@@ -148,7 +148,7 @@
             "Uuo", "Ununoctium", "(294)", 18, 7
         ];
 
-        let musicBall, musicBallRotateSpeed = 0, sampleRate = 6;
+        let musicBall, musicBallRotateSpeed = 0, sampleRate = 4;
 
         let camera, scene, renderer;
         let controls;
@@ -157,7 +157,8 @@
         let targets = { table: [], sphere: [], helix: [], grid: [] };
 
         const rScale = (val) => {
-            return 0 + 100 * val / 255;
+            return Math.pow(val / 255, 4) * 100;
+            // return 0 + 70 * val / 255;
         }
 
         const loadAudio = (file) => {
@@ -191,25 +192,26 @@
                     if (count % (sampleRate * 60) === 0) {
                         var vector = new THREE.Vector3();
                         var spherical = new THREE.Spherical();
-                        for (var i = 10, l = dataArray.length - 10; i < l; i += 5) {
+                        const voiceStep = 10;
+                        for (var i = voiceStep, l = dataArray.length - voiceStep; i < l; i += voiceStep) {
                             let avgVoice = 0;
-                            for (let j = 0; j < 5; j++) {
+                            for (let j = 0; j < voiceStep; j++) {
                                 avgVoice += dataArray[i + j];
                             }
-                            avgVoice /= 5;
+                            avgVoice /= voiceStep;
                             const phi = i * Math.PI / l;
                             const theta = voiceCount * Plate.angleStep;
                             var targetObj = new THREE.Object3D();
-                            spherical.set(800, phi, theta);
+                            spherical.set(200, phi, theta);
                             targetObj.position.setFromSpherical(spherical);
                             vector.copy(targetObj.position).multiplyScalar(2);
                             targetObj.lookAt(vector);
                             // targets.sphere.push(targetObj);
 
-                            const r = rScale(avgVoice);
-                            if (r > 0) {
+                            const size = rScale(avgVoice);
+                            if (size > 0) {
                                 const plate = new Plate();
-                                plate.init(targetObj.position.x, targetObj.position.y, targetObj.position.z, targetObj.rotation.x, targetObj.rotation.y, targetObj.rotation.z, r);
+                                plate.init(targetObj.position.x, targetObj.position.y, targetObj.position.z, targetObj.rotation.x, targetObj.rotation.y, targetObj.rotation.z, size);
                                 musicBall.add(plate.plateObj);
                             }
                         }
@@ -298,7 +300,7 @@
 
         function init() {
             camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1, 10000);
-            camera.position.z = 3000;
+            camera.position.z = 1000;
 
             scene = new THREE.Scene();
 

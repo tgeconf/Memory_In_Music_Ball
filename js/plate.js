@@ -51,7 +51,7 @@ class Plate {
         this.plateDiv.style.opacity = this.opacity;
         this.plateDiv.style.width = size + 'px';
         this.plateDiv.style.height = size + 'px';
-        this.plateDiv.style.backgroundColor = 'rgba(0,127,127,' + (Math.random() * 0.5 + 0.25) + ')';
+        // this.plateDiv.style.backgroundColor = 'rgba(0,127,127,' + (Math.random() * 0.5 + 0.25) + ')';
         this.plateObj = new THREE.CSS3DObject(this.plateDiv);
         // this.plateObj.position.x = Math.random() * 4000 - 2000;
         // this.plateObj.position.y = Math.random() * 4000 - 2000;
