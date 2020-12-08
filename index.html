@@ -157,7 +157,7 @@
         let targets = { table: [], sphere: [], helix: [], grid: [] };
 
         const rScale = (val) => {
-            return 6 + 100 * val / 255;
+            return 0 + 100 * val / 255;
         }
 
         const loadAudio = (file) => {
@@ -191,7 +191,7 @@
                     if (count % (sampleRate * 60) === 0) {
                         var vector = new THREE.Vector3();
                         var spherical = new THREE.Spherical();
-                        for (var i = 5, l = dataArray.length - 5; i < l; i += 5) {
+                        for (var i = 10, l = dataArray.length - 10; i < l; i += 5) {
                             let avgVoice = 0;
                             for (let j = 0; j < 5; j++) {
                                 avgVoice += dataArray[i + j];
@@ -206,9 +206,12 @@
                             targetObj.lookAt(vector);
                             // targets.sphere.push(targetObj);
 
-                            const plate = new Plate();
-                            plate.init(targetObj.position.x, targetObj.position.y, targetObj.position.z, targetObj.rotation.x, targetObj.rotation.y, targetObj.rotation.z, rScale(avgVoice));
-                            musicBall.add(plate.plateObj);
+                            const r = rScale(avgVoice);
+                            if (r > 0) {
+                                const plate = new Plate();
+                                plate.init(targetObj.position.x, targetObj.position.y, targetObj.position.z, targetObj.rotation.x, targetObj.rotation.y, targetObj.rotation.z, r);
+                                musicBall.add(plate.plateObj);
+                            }
                         }
                         voiceCount++;
                     }
