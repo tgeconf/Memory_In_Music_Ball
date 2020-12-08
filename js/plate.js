@@ -1,4 +1,5 @@
 class Plate {
+    static angleStep = 0.1;
     static plates = [];
     static updateAll() {
         this.plates.forEach(p => {
@@ -21,13 +22,15 @@ class Plate {
             Plate.plates[i].xRotateSpeed = (t.rotation.x - Plate.plates[i].plateObj.rotation.x) / stepNum;
             Plate.plates[i].yRotateSpeed = (t.rotation.y - Plate.plates[i].plateObj.rotation.y) / stepNum;
             Plate.plates[i].zRotateSpeed = (t.rotation.z - Plate.plates[i].plateObj.rotation.z) / stepNum;
-            console.log('speed: ', i, Plate.plates[i].xSpeed, Plate.plates[i].ySpeed, Plate.plates[i].zSpeed);
         })
     }
 
     constructor() {
+        this.plateDiv;
         this.plateObj;
         this.scene;
+        this.initOpacitySpeed = 0.01;
+        this.opacity = 0;
         this.xSpeed = 0;
         this.ySpeed = 0;
         this.zSpeed = 0;
@@ -42,18 +45,32 @@ class Plate {
         this.targetRotationZ;
     }
 
-    init() {
-        const element = document.createElement('div');
-        element.className = 'element';
-        element.style.backgroundColor = 'rgba(0,127,127,' + (Math.random() * 0.5 + 0.25) + ')';
-        this.plateObj = new THREE.CSS3DObject(element);
-        this.plateObj.position.x = Math.random() * 4000 - 2000;
-        this.plateObj.position.y = Math.random() * 4000 - 2000;
-        this.plateObj.position.z = Math.random() * 4000 - 2000;
+    init(x, y, z, rx, ry, rz, size) {
+        this.plateDiv = document.createElement('div');
+        this.plateDiv.className = 'element';
+        this.plateDiv.style.opacity = this.opacity;
+        this.plateDiv.style.width = size + 'px';
+        this.plateDiv.style.height = size + 'px';
+        this.plateDiv.style.backgroundColor = 'rgba(0,127,127,' + (Math.random() * 0.5 + 0.25) + ')';
+        this.plateObj = new THREE.CSS3DObject(this.plateDiv);
+        // this.plateObj.position.x = Math.random() * 4000 - 2000;
+        // this.plateObj.position.y = Math.random() * 4000 - 2000;
+        // this.plateObj.position.z = Math.random() * 4000 - 2000;
+        this.plateObj.position.x = x;
+        this.plateObj.position.y = y;
+        this.plateObj.position.z = z;
+        this.plateObj.rotation.x = rx;
+        this.plateObj.rotation.y = ry;
+        this.plateObj.rotation.z = rz;
         Plate.plates.push(this);
     }
 
     update() {
+        if (this.opacity < 1) {
+            this.opacity += this.initOpacitySpeed;
+            this.plateDiv.style.opacity = this.opacity;
+        }
+
         // console.log(this.xSpeed);
         this.plateObj.position.x += this.xSpeed;
         this.plateObj.position.y += this.ySpeed;
@@ -62,7 +79,6 @@ class Plate {
         this.plateObj.rotation.y += this.yRotateSpeed;
         this.plateObj.rotation.z += this.zRotateSpeed;
         if (Math.abs(this.plateObj.position.x - this.targetX) < 1) {
-            console.log(this.plateObj.position.x, this.targetX);
             this.plateObj.position.x = this.targetX;
             this.xSpeed = 0;
         }

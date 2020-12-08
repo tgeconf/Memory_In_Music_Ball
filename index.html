@@ -17,6 +17,7 @@
         Upload
     </label>
     <input type="file" id="thefile" accept="audio/*" />
+    <audio id="audio"></audio>
     <div id="container"></div>
     <div id="menu">
         <button id="table">TABLE</button>
@@ -147,102 +148,139 @@
             "Uuo", "Ununoctium", "(294)", 18, 7
         ];
 
-        let musicBall;
+        let musicBall, musicBallRotateSpeed = 0, sampleRate = 6;
+
+        let camera, scene, renderer;
+        let controls;
+
+        let objects = [];
+        let targets = { table: [], sphere: [], helix: [], grid: [] };
+
+        const rScale = (val) => {
+            return 6 + 100 * val / 255;
+        }
 
         const loadAudio = (file) => {
             const audio = document.getElementById('audio');
             audio.src = URL.createObjectURL(file);
             audio.load();
             audio.play();
-            var context = new AudioContext();
-            var src = context.createMediaElementSource(audio);
-            var analyser = context.createAnalyser();
+            audio.onloadedmetadata = () => {
+                console.log('audio duration: ', audio.duration);
+                Plate.angleStep = Math.PI * 2 / (audio.duration / sampleRate);
+                var context = new AudioContext();
+                var src = context.createMediaElementSource(audio);
+                var analyser = context.createAnalyser();
 
-            src.connect(analyser);
-            analyser.connect(context.destination);
-            analyser.fftSize = 256;
-            var bufferLength = analyser.frequencyBinCount;
+                src.connect(analyser);
+                analyser.connect(context.destination);
+                analyser.fftSize = 256;
+                var bufferLength = analyser.frequencyBinCount;
+                var dataArray = new Uint8Array(bufferLength);
 
-            var dataArray = new Uint8Array(bufferLength);
-
-            let count = 0;
-            let voiceCount = 0;
-            let preAllVoiceSum = 0;
-            let voiceRise = 0;
-            let preVoice = 1;
-            let rising = false;
-            const colors = [[65, 32, 137], [17, 101, 171], [58, 176, 53], [245, 182, 27], [231, 32, 25]];
-            function renderFrame() {
-
-                requestAnimationFrame(renderFrame);
-                analyser.getByteFrequencyData(dataArray);
-                // cameraPlanet.updateMusicCanvas(dataArray, 255);
-                if (count % 60 === 0) {
-                    voiceCount++;
-                    // dataArray = dataArray.sort().reverse();
-                    let highVoice = 0;
-                    let voiceAvg = 0;
-                    let voiceAAvg = 0;
-                    let maxAAvg = 0;
-                    dataArray.forEach((v, i) => {
-                        if (v >= 220) {
-                            highVoice++;
-                        }
-                        voiceAvg += v;
-                        voiceAAvg += ((i / dataArray.length) * v);
-                        maxAAvg += ((i / dataArray.length) * 255);
-                    })
-
-                    voiceAvg /= dataArray.length;
-                    voiceAAvg /= dataArray.length;
-                    maxAAvg /= dataArray.length;
-                    preAllVoiceSum += voiceAAvg;
-                    const preAllVoiceAvg = preAllVoiceSum / voiceCount;
-                    let newVoiceRise = (voiceAAvg - preVoice) / preVoice;
-
-                    for (let i = 0; i < (voiceAvg / 255 * 4); i++) {
-                        const tmpBubble = new Bubble(
-                            cameraPlanet.x,
-                            cameraPlanet.y,
-                            cameraPlanet.z - 100,
-                            Math.random() * cameraPlanet.size / 10 + cameraPlanet.size / 30,
-                            { r: 92, g: 176, b: 255 },
-                            Math.random() * 0.6 + 0.2,
-                            Math.floor(Math.random() * 30),
-                            cameraPlanet.scene, 0, true);
-                        tmpBubble.init();
-                        Planet.mainPlanets.forEach(mp => {
-                            if (!mp.hide) {
-                                const tmpBubble = new Bubble(
-                                    mp.x,
-                                    mp.y,
-                                    mp.z - 100,
-                                    Math.random() * mp.size * 3 / 10 + mp.size / 10,
-                                    { r: 92, g: 176, b: 255 },
-                                    Math.random() * 0.6 + 0.2,
-                                    Math.floor(Math.random() * 30),
-                                    mp.scene, 1, true);
-                                tmpBubble.init();
+                let count = 0;
+                let voiceCount = 0;
+                let preAllVoiceSum = 0;
+                let voiceRise = 0;
+                let preVoice = 1;
+                let rising = false;
+                const colors = [[65, 32, 137], [17, 101, 171], [58, 176, 53], [245, 182, 27], [231, 32, 25]];
+                function renderFrame() {
+                    requestAnimationFrame(renderFrame);
+                    analyser.getByteFrequencyData(dataArray);
+                    if (count % (sampleRate * 60) === 0) {
+                        var vector = new THREE.Vector3();
+                        var spherical = new THREE.Spherical();
+                        for (var i = 5, l = dataArray.length - 5; i < l; i += 5) {
+                            let avgVoice = 0;
+                            for (let j = 0; j < 5; j++) {
+                                avgVoice += dataArray[i + j];
                             }
-                        })
-                    }
+                            avgVoice /= 5;
+                            const phi = i * Math.PI / l;
+                            const theta = voiceCount * Plate.angleStep;
+                            var targetObj = new THREE.Object3D();
+                            spherical.set(800, phi, theta);
+                            targetObj.position.setFromSpherical(spherical);
+                            vector.copy(targetObj.position).multiplyScalar(2);
+                            targetObj.lookAt(vector);
+                            // targets.sphere.push(targetObj);
 
-                    let r = dynamicRScale(dataArray[0], [120, dataArray[0]]);
-                    if (newVoiceRise > 0.1 || (rising && (voiceAAvg - preVoice > 0 || (preVoice - voiceAAvg) / preVoice < 0.1))) {
-                        rising = true;
-                        Planet.popUpRatio = voiceAAvg / maxAAvg / 2;
-                    } else {
-                        rising = false;
+                            const plate = new Plate();
+                            plate.init(targetObj.position.x, targetObj.position.y, targetObj.position.z, targetObj.rotation.x, targetObj.rotation.y, targetObj.rotation.z, rScale(avgVoice));
+                            musicBall.add(plate.plateObj);
+                        }
+                        voiceCount++;
                     }
-                    preVoice = voiceAAvg === 0 ? 0.1 : voiceAAvg;
-                    voiceRise = newVoiceRise;
-                } else {
-                    Planet.popUpRatio = 0;
+                    // if (count % 60 === 0) {
+                    //     voiceCount++;
+                    //     // dataArray = dataArray.sort().reverse();
+                    //     let highVoice = 0;
+                    //     let voiceAvg = 0;
+                    //     let voiceAAvg = 0;
+                    //     let maxAAvg = 0;
+                    //     dataArray.forEach((v, i) => {
+                    //         if (v >= 220) {
+                    //             highVoice++;
+                    //         }
+                    //         voiceAvg += v;
+                    //         voiceAAvg += ((i / dataArray.length) * v);
+                    //         maxAAvg += ((i / dataArray.length) * 255);
+                    //     })
+
+                    //     voiceAvg /= dataArray.length;
+                    //     voiceAAvg /= dataArray.length;
+                    //     maxAAvg /= dataArray.length;
+                    //     preAllVoiceSum += voiceAAvg;
+                    //     const preAllVoiceAvg = preAllVoiceSum / voiceCount;
+                    //     let newVoiceRise = (voiceAAvg - preVoice) / preVoice;
+
+                    //     for (let i = 0; i < (voiceAvg / 255 * 4); i++) {
+                    //         const tmpBubble = new Bubble(
+                    //             cameraPlanet.x,
+                    //             cameraPlanet.y,
+                    //             cameraPlanet.z - 100,
+                    //             Math.random() * cameraPlanet.size / 10 + cameraPlanet.size / 30,
+                    //             { r: 92, g: 176, b: 255 },
+                    //             Math.random() * 0.6 + 0.2,
+                    //             Math.floor(Math.random() * 30),
+                    //             cameraPlanet.scene, 0, true);
+                    //         tmpBubble.init();
+                    //         Planet.mainPlanets.forEach(mp => {
+                    //             if (!mp.hide) {
+                    //                 const tmpBubble = new Bubble(
+                    //                     mp.x,
+                    //                     mp.y,
+                    //                     mp.z - 100,
+                    //                     Math.random() * mp.size * 3 / 10 + mp.size / 10,
+                    //                     { r: 92, g: 176, b: 255 },
+                    //                     Math.random() * 0.6 + 0.2,
+                    //                     Math.floor(Math.random() * 30),
+                    //                     mp.scene, 1, true);
+                    //                 tmpBubble.init();
+                    //             }
+                    //         })
+                    //     }
+
+                    //     let r = dynamicRScale(dataArray[0], [120, dataArray[0]]);
+                    //     if (newVoiceRise > 0.1 || (rising && (voiceAAvg - preVoice > 0 || (preVoice - voiceAAvg) / preVoice < 0.1))) {
+                    //         rising = true;
+                    //         Planet.popUpRatio = voiceAAvg / maxAAvg / 2;
+                    //     } else {
+                    //         rising = false;
+                    //     }
+                    //     preVoice = voiceAAvg === 0 ? 0.1 : voiceAAvg;
+                    //     voiceRise = newVoiceRise;
+                    // } else {
+                    //     Planet.popUpRatio = 0;
+                    // }
+                    count++;
                 }
-                count++;
+
+                renderFrame();
+                musicBallRotateSpeed = Plate.angleStep / (60 * sampleRate);
             }
 
-            renderFrame();
         }
 
         var file = document.getElementById("thefile");
@@ -251,11 +289,6 @@
             loadAudio(files[0]);
         }
 
-        var camera, scene, renderer;
-        var controls;
-
-        var objects = [];
-        var targets = { table: [], sphere: [], helix: [], grid: [] };
 
         init();
         animate();
@@ -308,19 +341,22 @@
                 // object.position.x = Math.random() * 4000 - 2000;
                 // object.position.y = Math.random() * 4000 - 2000;
                 // object.position.z = Math.random() * 4000 - 2000;
-                const plate = new Plate();
-                plate.init();
-                musicBall.add(plate.plateObj);
-                objects.push(plate.plateObj);
+
 
                 var phi = Math.acos(-1 + (2 * i) / l);
-                var theta = Math.sqrt(l * Math.PI) * phi;
+                // var theta = Math.sqrt(l * Math.PI) * phi;
+                var theta = Math.PI / 2 * (i % 4);
                 var targetObj = new THREE.Object3D();
                 spherical.set(800, phi, theta);
                 targetObj.position.setFromSpherical(spherical);
                 vector.copy(targetObj.position).multiplyScalar(2);
                 targetObj.lookAt(vector);
                 targets.sphere.push(targetObj);
+
+                // const plate = new Plate();
+                // plate.init(targetObj.position.x, targetObj.position.y, targetObj.position.z, targetObj.rotation.x, targetObj.rotation.y, targetObj.rotation.z);
+                // musicBall.add(plate.plateObj);
+                // objects.push(plate.plateObj);
             }
 
             // helix
@@ -365,7 +401,7 @@
             document.getElementById('container').appendChild(renderer.domElement);
 
             controls = new THREE.TrackballControls(camera, renderer.domElement);
-            controls.rotateSpeed = 0.5;
+            controls.rotateSpeed = 10;
             controls.minDistance = 500;
             controls.maxDistance = 6000;
             controls.addEventListener('change', render);
@@ -385,7 +421,7 @@
                 Plate.moveTo(targets.grid, 100);
             }, false);
 
-            Plate.moveTo(targets.sphere, 100);
+            // Plate.moveTo(targets.sphere, 100);
             window.addEventListener('resize', onWindowResize, false);
         }
 
@@ -403,7 +439,7 @@
         function animate() {
             requestAnimationFrame(animate);
             Plate.updateAll();
-            musicBall.rotation.y += 0.01;
+            musicBall.rotation.y -= musicBallRotateSpeed;
             controls.update();
             render();
             // TWEEN.update();
