@@ -12,7 +12,11 @@
     <script src="js/libs/tween.min.js"></script>
     <script src="js/libs/TrackballControls.js"></script>
     <script src="js/CSS3DRenderer.js"></script>
-
+    <script src="js/plate.js"></script>
+    <label for="thefile" class="custom-file-upload">
+        Upload
+    </label>
+    <input type="file" id="thefile" accept="audio/*" />
     <div id="container"></div>
     <div id="menu">
         <button id="table">TABLE</button>
@@ -143,6 +147,110 @@
             "Uuo", "Ununoctium", "(294)", 18, 7
         ];
 
+        let musicBall;
+
+        const loadAudio = (file) => {
+            const audio = document.getElementById('audio');
+            audio.src = URL.createObjectURL(file);
+            audio.load();
+            audio.play();
+            var context = new AudioContext();
+            var src = context.createMediaElementSource(audio);
+            var analyser = context.createAnalyser();
+
+            src.connect(analyser);
+            analyser.connect(context.destination);
+            analyser.fftSize = 256;
+            var bufferLength = analyser.frequencyBinCount;
+
+            var dataArray = new Uint8Array(bufferLength);
+
+            let count = 0;
+            let voiceCount = 0;
+            let preAllVoiceSum = 0;
+            let voiceRise = 0;
+            let preVoice = 1;
+            let rising = false;
+            const colors = [[65, 32, 137], [17, 101, 171], [58, 176, 53], [245, 182, 27], [231, 32, 25]];
+            function renderFrame() {
+
+                requestAnimationFrame(renderFrame);
+                analyser.getByteFrequencyData(dataArray);
+                // cameraPlanet.updateMusicCanvas(dataArray, 255);
+                if (count % 60 === 0) {
+                    voiceCount++;
+                    // dataArray = dataArray.sort().reverse();
+                    let highVoice = 0;
+                    let voiceAvg = 0;
+                    let voiceAAvg = 0;
+                    let maxAAvg = 0;
+                    dataArray.forEach((v, i) => {
+                        if (v >= 220) {
+                            highVoice++;
+                        }
+                        voiceAvg += v;
+                        voiceAAvg += ((i / dataArray.length) * v);
+                        maxAAvg += ((i / dataArray.length) * 255);
+                    })
+
+                    voiceAvg /= dataArray.length;
+                    voiceAAvg /= dataArray.length;
+                    maxAAvg /= dataArray.length;
+                    preAllVoiceSum += voiceAAvg;
+                    const preAllVoiceAvg = preAllVoiceSum / voiceCount;
+                    let newVoiceRise = (voiceAAvg - preVoice) / preVoice;
+
+                    for (let i = 0; i < (voiceAvg / 255 * 4); i++) {
+                        const tmpBubble = new Bubble(
+                            cameraPlanet.x,
+                            cameraPlanet.y,
+                            cameraPlanet.z - 100,
+                            Math.random() * cameraPlanet.size / 10 + cameraPlanet.size / 30,
+                            { r: 92, g: 176, b: 255 },
+                            Math.random() * 0.6 + 0.2,
+                            Math.floor(Math.random() * 30),
+                            cameraPlanet.scene, 0, true);
+                        tmpBubble.init();
+                        Planet.mainPlanets.forEach(mp => {
+                            if (!mp.hide) {
+                                const tmpBubble = new Bubble(
+                                    mp.x,
+                                    mp.y,
+                                    mp.z - 100,
+                                    Math.random() * mp.size * 3 / 10 + mp.size / 10,
+                                    { r: 92, g: 176, b: 255 },
+                                    Math.random() * 0.6 + 0.2,
+                                    Math.floor(Math.random() * 30),
+                                    mp.scene, 1, true);
+                                tmpBubble.init();
+                            }
+                        })
+                    }
+
+                    let r = dynamicRScale(dataArray[0], [120, dataArray[0]]);
+                    if (newVoiceRise > 0.1 || (rising && (voiceAAvg - preVoice > 0 || (preVoice - voiceAAvg) / preVoice < 0.1))) {
+                        rising = true;
+                        Planet.popUpRatio = voiceAAvg / maxAAvg / 2;
+                    } else {
+                        rising = false;
+                    }
+                    preVoice = voiceAAvg === 0 ? 0.1 : voiceAAvg;
+                    voiceRise = newVoiceRise;
+                } else {
+                    Planet.popUpRatio = 0;
+                }
+                count++;
+            }
+
+            renderFrame();
+        }
+
+        var file = document.getElementById("thefile");
+        file.onchange = function () {
+            var files = this.files;
+            loadAudio(files[0]);
+        }
+
         var camera, scene, renderer;
         var controls;
 
@@ -158,8 +266,11 @@
 
             scene = new THREE.Scene();
 
-
-
+            musicBall = new THREE.Group();
+            musicBall.position.x = 0;
+            musicBall.position.y = 0;
+            musicBall.position.z = 0;
+            scene.add(musicBall);
             // table
             // for (var i = 0; i < table.length; i += 5) {
 
@@ -189,16 +300,18 @@
             var vector = new THREE.Vector3();
             var spherical = new THREE.Spherical();
 
-            for (var i = 0, l = table.length/5; i < l; i ++) {
-                var element = document.createElement('div');
-                element.className = 'element';
-                element.style.backgroundColor = 'rgba(0,127,127,' + (Math.random() * 0.5 + 0.25) + ')';
-                var object = new THREE.CSS3DObject(element);
-                object.position.x = Math.random() * 4000 - 2000;
-                object.position.y = Math.random() * 4000 - 2000;
-                object.position.z = Math.random() * 4000 - 2000;
-                scene.add(object);
-                objects.push(object);
+            for (var i = 0, l = table.length / 5; i < l; i++) {
+                // var element = document.createElement('div');
+                // element.className = 'element';
+                // element.style.backgroundColor = 'rgba(0,127,127,' + (Math.random() * 0.5 + 0.25) + ')';
+                // var object = new THREE.CSS3DObject(element);
+                // object.position.x = Math.random() * 4000 - 2000;
+                // object.position.y = Math.random() * 4000 - 2000;
+                // object.position.z = Math.random() * 4000 - 2000;
+                const plate = new Plate();
+                plate.init();
+                musicBall.add(plate.plateObj);
+                objects.push(plate.plateObj);
 
                 var phi = Math.acos(-1 + (2 * i) / l);
                 var theta = Math.sqrt(l * Math.PI) * phi;
@@ -257,68 +370,23 @@
             controls.maxDistance = 6000;
             controls.addEventListener('change', render);
 
-            var button = document.getElementById('table');
-            button.addEventListener('click', function (event) {
-
-                transform(targets.table, 2000);
-
-            }, false);
-
             var button = document.getElementById('sphere');
             button.addEventListener('click', function (event) {
-
-                transform(targets.sphere, 2000);
-
+                Plate.moveTo(targets.sphere, 100);
             }, false);
 
             var button = document.getElementById('helix');
             button.addEventListener('click', function (event) {
-
-                transform(targets.helix, 2000);
-
+                Plate.moveTo(targets.helix, 100);
             }, false);
 
             var button = document.getElementById('grid');
             button.addEventListener('click', function (event) {
-
-                transform(targets.grid, 2000);
-
+                Plate.moveTo(targets.grid, 100);
             }, false);
 
-            transform(targets.sphere, 2000);
-
-            //
-
+            Plate.moveTo(targets.sphere, 100);
             window.addEventListener('resize', onWindowResize, false);
-
-        }
-
-        function transform(targets, duration) {
-
-            TWEEN.removeAll();
-
-            for (var i = 0; i < objects.length; i++) {
-
-                var object = objects[i];
-                var target = targets[i];
-
-                new TWEEN.Tween(object.position)
-                    .to({ x: target.position.x, y: target.position.y, z: target.position.z }, Math.random() * duration + duration)
-                    .easing(TWEEN.Easing.Exponential.InOut)
-                    .start();
-
-                new TWEEN.Tween(object.rotation)
-                    .to({ x: target.rotation.x, y: target.rotation.y, z: target.rotation.z }, Math.random() * duration + duration)
-                    .easing(TWEEN.Easing.Exponential.InOut)
-                    .start();
-
-            }
-
-            new TWEEN.Tween(this)
-                .to({}, duration * 2)
-                .onUpdate(render)
-                .start();
-
         }
 
         function onWindowResize() {
@@ -333,13 +401,12 @@
         }
 
         function animate() {
-
             requestAnimationFrame(animate);
-
-            TWEEN.update();
-
+            Plate.updateAll();
+            musicBall.rotation.y += 0.01;
             controls.update();
-
+            render();
+            // TWEEN.update();
         }
 
         function render() {
