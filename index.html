@@ -8,6 +8,7 @@
 </head>
 
 <body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
     <script src="js/libs/three.js"></script>
     <script src="js/libs/tween.min.js"></script>
     <script src="js/libs/TrackballControls.js"></script>
@@ -18,14 +19,15 @@
     </label>
     <input type="file" id="thefile" accept="audio/*" />
     <audio id="audio"></audio>
-    <div id="container"></div>
+    <img id='testImg' class='color-material' src='./img/test1.jpg' />
+    <div id="container" class='container'></div>
     <div id="menu">
         <button id="table">TABLE</button>
         <button id="sphere">SPHERE</button>
         <button id="helix">HELIX</button>
         <button id="grid">GRID</button>
     </div>
-
+    <script src='./js/pickImgColors.js'></script>
     <script>
         var table = [
             "H", "Hydrogen", "1.00794", 1, 1,
@@ -148,7 +150,7 @@
             "Uuo", "Ununoctium", "(294)", 18, 7
         ];
 
-        let musicBall, musicBallRotateSpeed = 0, sampleRate = 4;
+        let musicBall, musicBallRotateSpeed = 0, sampleRate = 2;
 
         let camera, scene, renderer;
         let controls;
@@ -185,16 +187,21 @@
                 let voiceRise = 0;
                 let preVoice = 1;
                 let rising = false;
-                const colors = [[65, 32, 137], [17, 101, 171], [58, 176, 53], [245, 182, 27], [231, 32, 25]];
+                const voiceStep = 10;
+                ColorPicker.colorNum = Math.ceil((bufferLength - 2 * voiceStep) / voiceStep + 1);
+                const colorPicker = new ColorPicker(document.getElementById('testImg'));
+                colorPicker.pickPalette();
+                console.log('bufferlen: ', bufferLength, colorPicker.palette);
+
                 function renderFrame() {
                     requestAnimationFrame(renderFrame);
                     analyser.getByteFrequencyData(dataArray);
                     if (count % (sampleRate * 60) === 0) {
                         var vector = new THREE.Vector3();
                         var spherical = new THREE.Spherical();
-                        const voiceStep = 10;
                         for (var i = voiceStep, l = dataArray.length - voiceStep; i < l; i += voiceStep) {
                             let avgVoice = 0;
+                            const targetColor = colorPicker.palette[i / voiceStep - 1];
                             for (let j = 0; j < voiceStep; j++) {
                                 avgVoice += dataArray[i + j];
                             }
@@ -211,7 +218,15 @@
                             const size = rScale(avgVoice);
                             if (size > 0) {
                                 const plate = new Plate();
-                                plate.init(targetObj.position.x, targetObj.position.y, targetObj.position.z, targetObj.rotation.x, targetObj.rotation.y, targetObj.rotation.z, size);
+                                plate.init(
+                                    targetObj.position.x,
+                                    targetObj.position.y,
+                                    targetObj.position.z,
+                                    targetObj.rotation.x,
+                                    targetObj.rotation.y,
+                                    targetObj.rotation.z,
+                                    size,
+                                    { r: targetColor[0], g: targetColor[1], b: targetColor[2] });
                                 musicBall.add(plate.plateObj);
                             }
                         }

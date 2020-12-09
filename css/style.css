@@ -44,6 +44,12 @@ input, audio {
     text-align: center;
 }
 
+.container {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+}
+
 .element {
     width: 20px;
     height: 20px;
@@ -103,4 +109,8 @@ button:hover {
 button:active {
     color: #000000;
     background-color: rgba(0, 255, 255, 0.75);
+}
+
+.color-material {
+    opacity: 0;
 }
