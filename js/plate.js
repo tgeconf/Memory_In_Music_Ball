@@ -52,8 +52,8 @@ class Plate {
         this.plateDiv.style.width = size + 'px';
         this.plateDiv.style.height = size + 'px';
         // this.plateDiv.style.backgroundColor = 'rgba(0,127,127,' + (Math.random() * 0.5 + 0.25) + ')';
-        this.plateDiv.style.backgroundColor = 'rgba(' + color.r + ',' + color.g + ',' + color.b + ',' + (Math.random() * 0.1 + 0.2) + ')';
-        this.plateDiv.style.boxShadow = '0px 0px 6px rgba(' + color.r + ',' + color.g + ',' + color.b + ',' + (Math.random() * 0.1 + 0.1) + ')';
+        this.plateDiv.style.backgroundColor = 'rgba(' + color.r + ',' + color.g + ',' + color.b + ',' + (Math.random() * 0.3 + 0.1) + ')';
+        this.plateDiv.style.boxShadow = '0px 0px 6px rgba(' + color.r + ',' + color.g + ',' + color.b + ',' + (Math.random() * 0.2 + 0.01) + ')';
         this.plateObj = new THREE.CSS3DObject(this.plateDiv);
         // this.plateObj.position.x = Math.random() * 4000 - 2000;
         // this.plateObj.position.y = Math.random() * 4000 - 2000;

@@ -19,7 +19,7 @@
     </label>
     <input type="file" id="thefile" accept="audio/*" />
     <audio id="audio"></audio>
-    <img id='testImg' class='color-material' src='./img/test1.jpg' />
+    <img id='testImg' class='color-material' src='./img/test2.jpg' />
     <div id="container" class='container'></div>
     <div id="menu">
         <button id="table">TABLE</button>
@@ -191,7 +191,7 @@
                 ColorPicker.colorNum = Math.ceil((bufferLength - 2 * voiceStep) / voiceStep + 1);
                 const colorPicker = new ColorPicker(document.getElementById('testImg'));
                 colorPicker.pickPalette();
-                console.log('bufferlen: ', bufferLength, colorPicker.palette);
+                console.log('bufferlen: ', bufferLength, ColorPicker.colorNum, colorPicker.palette);
 
                 function renderFrame() {
                     requestAnimationFrame(renderFrame);
