@@ -29,12 +29,12 @@
     <audio id="audio"></audio>
     <img id='testImg' class='color-material' src='./img/test2.jpg' />
     <div id="container" class='container'></div>
-    <div id="menu">
+    <!-- <div id="menu">
         <button id="table">TABLE</button>
         <button id="sphere">SPHERE</button>
         <button id="helix">HELIX</button>
         <button id="grid">GRID</button>
-    </div>
+    </div> -->
     <script src='./js/pickImgColors.js'></script>
     <script>
         let musicBall, musicBallRotateSpeed = 0, sampleRate = 2;
@@ -263,20 +263,20 @@
             controls.maxDistance = 6000;
             controls.addEventListener('change', render);
 
-            var button = document.getElementById('sphere');
-            button.addEventListener('click', function (event) {
-                Plate.moveTo(targets.sphere, 100);
-            }, false);
+            // var button = document.getElementById('sphere');
+            // button.addEventListener('click', function (event) {
+            //     Plate.moveTo(targets.sphere, 100);
+            // }, false);
 
-            var button = document.getElementById('helix');
-            button.addEventListener('click', function (event) {
-                Plate.moveTo(targets.helix, 100);
-            }, false);
+            // var button = document.getElementById('helix');
+            // button.addEventListener('click', function (event) {
+            //     Plate.moveTo(targets.helix, 100);
+            // }, false);
 
-            var button = document.getElementById('grid');
-            button.addEventListener('click', function (event) {
-                Plate.moveTo(targets.grid, 100);
-            }, false);
+            // var button = document.getElementById('grid');
+            // button.addEventListener('click', function (event) {
+            //     Plate.moveTo(targets.grid, 100);
+            // }, false);
 
             // Plate.moveTo(targets.sphere, 100);
             // transform(targets.helix, 2000);

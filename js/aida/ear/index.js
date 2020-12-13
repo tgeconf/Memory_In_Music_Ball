@@ -7,7 +7,7 @@
 
 ear.addCommands({
 	smart: true,// We need to say that this command is smart !
-	indexes: ["what's your *", "how's your *", 'layout according to *'], // * = the spoken text after How many people live in is recognized
+	indexes: ["what's your *", "how's your *", 'layout according to *', 'select *', 'cancel *'], // * = the spoken text after How many people live in is recognized
 	action: function (i, wildcard) {
 		switch (wildcard) {
 			case "name":
@@ -25,6 +25,35 @@ ear.addCommands({
 			case 'time':
 				if (i === 2) {
 					cmd.layoutTime = true;
+				}
+				break;
+			case 'spring':
+			case 'summer':
+			case 'autumn':
+			case 'winter':
+			case '2010':
+			case '2011':
+			case '2012':
+			case '2013':
+			case '2014':
+			case '2015':
+			case '2016':
+			case '2017':
+			case '2018':
+			case '2019':
+			case '2020':
+				if (i === 3) {
+					cmd.highlight = wildcard;
+				}
+				break;
+			case 'selection':
+				if (i === 4) {
+					cmd.cancelHighlight = true;
+				}
+				break;
+			case 'layout':
+				if (i === 4) {
+					cmd.cancelLayout = true;
 				}
 				break;
 			default:

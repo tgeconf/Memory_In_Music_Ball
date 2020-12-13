@@ -7,6 +7,19 @@ const cmd = new Proxy({}, {
             case 'layoutTime':
                 obj[prop] = value;
                 console.log('layout according to time');
+                Plate.layoutTime();
+                break;
+            case 'cancelLayout':
+                obj[prop] = value;
+                Plate.cancelLayout();
+                break;
+            case 'highlight':
+                obj[prop] = value;
+                Plate.highlight(value);
+                break;
+            case 'cancelHighlight':
+                obj[prop] = value;
+                Plate.cancelHighlight();
                 break;
         }
 

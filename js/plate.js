@@ -7,6 +7,112 @@ class Plate {
         })
     }
 
+    static highlight(category) {
+        this.plates.forEach(p => {
+            const keys = Object.keys(p.data);
+            let flag = false;
+            for (let i = 0; i < keys.length; i++) {
+                if (p.data[keys[i]] === category) {
+                    flag = true;
+                    p.highlighted = true;
+                    p.hidden = false;
+                    break;
+                }
+            }
+            if (!flag) {
+                if (!p.highlighted) {
+                    p.hidden = true;
+                }
+            }
+        })
+    }
+
+    static cancelHighlight() {
+        this.plates.forEach(p => {
+            p.highlighted = false;
+            p.hidden = false;
+        })
+    }
+
+    static cancelLayout() {
+        this.plates.forEach(p => {
+            p.plateDiv.classList.add('ani-bubble');
+            p.plateDiv.classList.remove('focus-ani-bubble');
+            p.xSpeed = p._xSpeed;
+            p.ySpeed = p._ySpeed;
+            p.zSpeed = p._zSpeed;
+        })
+
+        TWEEN.removeAll();
+        const duration = 2000;
+        for (var i = 0; i < Plate.plates.length; i++) {
+            var object = Plate.plates[i].plateObj;
+            var target = Plate.plates[i]._position;
+
+            new TWEEN.Tween(object.position)
+                .to({ x: target.x, y: target.y, z: target.z }, Math.random() * duration + duration)
+                .easing(TWEEN.Easing.Exponential.InOut)
+                .start();
+        }
+
+        new TWEEN.Tween(this)
+            .to({}, duration * 2)
+            .onUpdate(render)
+            .start();
+    }
+
+    static layoutTime() {
+        const ratio = 0.8
+        const startX = -ratio * SCENE_X / 2;
+        const monthStep = ratio * SCENE_X / 12;
+        const startY = -ratio * SCENE_Y / 2;
+        const hourStep = ratio * SCENE_Y / 24;
+        const targetPosis = [];
+        this.plates.forEach(p => {
+            const date = p.data.date.split('-');
+            const time = p.data.time.split(':');
+            const year = parseInt(date[0]);
+            const month = parseInt(date[1]);
+            const day = parseInt(date[2]);
+            const hour = parseInt(time[0]);
+            p._position = { x: p.plateObj.position.x, y: p.plateObj.position.y, z: p.plateObj.position.z };
+            targetPosis.push({
+                x: startX + Math.random() * monthStep + (month - 1) * monthStep,
+                y: startY + Math.random() * hourStep + (hour - 1) * hourStep,
+                z: p.plateObj.position.z
+            })
+            // this.moveTo({
+            //     x: startX + Math.random() * monthStep + (month - 1) * monthStep,
+            //     y: startY + Math.random() * hourStep + (hour - 1) * hourStep,
+            //     z: p.plateObj.position.z
+            // }, { x: 1, y: 1 }, 2000);
+            p.plateDiv.classList.remove('ani-bubble');
+            p.plateDiv.classList.add('focus-ani-bubble');
+            p._xSpeed = p.xSpeed;
+            p._ySpeed = p.ySpeed;
+            p._zSpeed = p.zSpeed;
+            p.xSpeed = 0;
+            p.ySpeed = 0;
+            p.zSpeed = 0;
+        })
+        TWEEN.removeAll();
+        const duration = 2000;
+        for (var i = 0; i < targetPosis.length; i++) {
+            var object = Plate.plates[i].plateObj;
+            var target = targetPosis[i];
+
+            new TWEEN.Tween(object.position)
+                .to({ x: target.x, y: target.y, z: target.z }, Math.random() * duration + duration)
+                .easing(TWEEN.Easing.Exponential.InOut)
+                .start();
+        }
+
+        new TWEEN.Tween(this)
+            .to({}, duration * 2)
+            .onUpdate(render)
+            .start();
+    }
+
     static moveTo(target, duration) {
         // const stepNum = duration;
         // target.forEach((t, i) => {
@@ -44,6 +150,40 @@ class Plate {
         this.targetRotationX;
         this.targetRotationY;
         this.targetRotationZ;
+        this._highlighted = false;
+        this._hidden = false;
+    }
+
+    get highlighted() {
+        return this._highlighted;
+    }
+
+    set highlighted(h) {
+        this._highlighted = h;
+        if (h) {
+            this.plateDiv.classList.add('highlight-element');
+            // this._xSpeed = this.xSpeed;
+            // this._ySpeed = this.ySpeed;
+            // this._zSpeed = this.zSpeed;
+            // this.xSpeed /= 3;
+            // this.ySpeed /= 3;
+            // this.zSpeed /= 3;
+        } else {
+            this.plateDiv.classList.remove('highlight-element');
+        }
+    }
+
+    get hidden() {
+        return this._hidden;
+    }
+
+    set hidden(h) {
+        this._hidden = h;
+        if (h) {
+            this.plateDiv.classList.add('hidden-element');
+        } else {
+            this.plateDiv.classList.remove('hidden-element');
+        }
     }
 
     init(x, y, z, rx, ry, rz, size, color) {
@@ -54,7 +194,7 @@ class Plate {
         // this.plateDiv.style.width = size + 'px';
         // this.plateDiv.style.height = size + 'px';
         // this.plateDiv.style.backgroundColor = 'rgba(0,127,127,' + (Math.random() * 0.5 + 0.25) + ')';
-        this.plateDiv.style.backgroundColor = 'rgba(' + color.r + ',' + color.g + ',' + color.b + ',' + (Math.random() * 0.3 + 0.1) + ')';
+        this.plateDiv.style.backgroundColor = 'rgba(' + color.r + ',' + color.g + ',' + color.b + ',' + (Math.random() * 0.1 + 0.1) + ')';
         this.plateDiv.style.boxShadow = '0px 0px 6px rgba(' + color.r + ',' + color.g + ',' + color.b + ',' + (Math.random() * 0.2 + 0.01) + ')';
         const that = this;
         this.plateDiv.onclick = (evt) => {
