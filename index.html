@@ -22,12 +22,17 @@
     <script src="js/libs/TrackballControls.js"></script>
     <script src="js/CSS3DRenderer.js"></script>
     <script src="js/plate.js"></script>
+    <script src="js/background.js"></script>
+    <script src="js/star.js"></script>
+    <script src="js/petal.js"></script>
     <label for="thefile" class="custom-file-upload">
         Upload
     </label>
     <input type="file" id="thefile" accept="audio/*" />
     <audio id="audio"></audio>
     <img id='testImg' class='color-material' src='./img/test2.jpg' />
+    <canvas id='bgContainer' class='bg-container'></canvas>
+    <canvas id='musicPatternContainer' class='bg-container'></canvas>
     <div id="container" class='container'></div>
     <!-- <div id="menu">
         <button id="table">TABLE</button>
@@ -37,6 +42,7 @@
     </div> -->
     <script src='./js/pickImgColors.js'></script>
     <script>
+
         let musicBall, musicBallRotateSpeed = 0, sampleRate = 2;
 
         let camera, scene, renderer;

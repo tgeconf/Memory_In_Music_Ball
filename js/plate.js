@@ -8,11 +8,26 @@ class Plate {
     }
 
     static highlight(category) {
+        switch (category) {
+            case 'spring':
+                break;
+            case 'summer':
+                Background.drawStars();
+                break;
+            case 'autumn':
+                Petal.init();
+                break;
+            case 'winter':
+                break;
+        }
+
+        let targetPlate;
         this.plates.forEach(p => {
             const keys = Object.keys(p.data);
             let flag = false;
             for (let i = 0; i < keys.length; i++) {
                 if (p.data[keys[i]] === category) {
+                    targetPlate = p;
                     flag = true;
                     p.highlighted = true;
                     p.hidden = false;
@@ -25,6 +40,20 @@ class Plate {
                 }
             }
         })
+
+        //pick color
+        const imgSrc = targetPlate.data.src;
+        const tmpImg = new Image();
+        console.log('loading image');
+        tmpImg.onload = () => {
+            ColorPicker.colorNum = 5;
+            const colorPicker = new ColorPicker(tmpImg);
+            colorPicker.pickPalette();
+            console.log('picked color: ', colorPicker.palette);
+            Background.changeBgColor(colorPicker.palette);
+        }
+        tmpImg.src = imgSrc;
+
     }
 
     static cancelHighlight() {
@@ -32,6 +61,8 @@ class Plate {
             p.highlighted = false;
             p.hidden = false;
         })
+        console.log('test');
+        Background.changeBgColor([[0, 0, 0]]);
     }
 
     static cancelLayout() {
@@ -81,11 +112,6 @@ class Plate {
                 y: startY + Math.random() * hourStep + (hour - 1) * hourStep,
                 z: p.plateObj.position.z
             })
-            // this.moveTo({
-            //     x: startX + Math.random() * monthStep + (month - 1) * monthStep,
-            //     y: startY + Math.random() * hourStep + (hour - 1) * hourStep,
-            //     z: p.plateObj.position.z
-            // }, { x: 1, y: 1 }, 2000);
             p.plateDiv.classList.remove('ani-bubble');
             p.plateDiv.classList.add('focus-ani-bubble');
             p._xSpeed = p.xSpeed;
@@ -226,6 +252,7 @@ class Plate {
 
     handleClick(evt) {
         if (this.plateDiv.classList.contains('focus-ani-bubble')) {
+            this.pauseAudio();
             this.moveTo({ x: 0, y: 0, z: 0 }, { x: 1, y: 1 }, 2000);
             this.plateDiv.classList.add('ani-bubble');
             this.plateDiv.classList.remove('focus-ani-bubble');
@@ -236,7 +263,8 @@ class Plate {
             this.plateObj.position.y = this._position.y;
             this.plateObj.position.z = this._position.z;
         } else {
-            this.moveTo({ x: 0, y: 0, z: 0 }, { x: 3, y: 3 }, 2000);
+            this.loadAudio();
+            this.moveTo({ x: 0, y: 0, z: 0 }, { x: 2, y: 2 }, 2000);
             this.plateDiv.classList.remove('ani-bubble');
             this.plateDiv.classList.add('focus-ani-bubble');
             this._xSpeed = this.xSpeed;
@@ -330,5 +358,66 @@ class Plate {
         //     this.plateObj.rotation.z = this.targetRotationZ;
         //     this.zRotateSpeed = 0;
         // }
+    }
+
+    pauseAudio() {
+        const audio = document.getElementById('audio');
+        audio.pause();
+    }
+
+    loadAudio() {
+        const audio = document.getElementById('audio');
+        audio.src = './media/testMusic.mp3';
+        audio.load();
+        audio.play();
+        audio.onloadedmetadata = () => {
+            console.log('audio duration: ', audio.duration);
+            var context = new AudioContext();
+            var src = context.createMediaElementSource(audio);
+            var analyser = context.createAnalyser();
+
+            src.connect(analyser);
+            analyser.connect(context.destination);
+            analyser.fftSize = 256;
+            var bufferLength = analyser.frequencyBinCount;
+            var dataArray = new Uint8Array(bufferLength);
+
+            let count = 0;
+            console.log('bufferlen: ', bufferLength);
+
+            function renderFrame() {
+                requestAnimationFrame(renderFrame);
+                analyser.getByteFrequencyData(dataArray);
+
+                if (count % 6 === 0) {
+                    const mergeNum = 8;
+                    const wStep = mergeNum * Petal.canvasW / dataArray.length;
+                    for (let i = 0; i < dataArray.length; i += mergeNum) {
+                        let avg = 0;
+                        for (let j = i; j < i + mergeNum; j++) {
+                            avg += dataArray[j];
+                        }
+                        avg /= mergeNum;
+                        if (avg > 150) {
+                            const petal = new Petal(Math.random() * wStep + i * wStep / mergeNum, -20, Math.random() * Math.PI);
+                        }
+                    }
+
+                    // dataArray.forEach((d, i) => {
+                    //     const wStep = Petal.canvasW / dataArray.length;
+                    //     // for (let j = 0; j < d / 100; j++) {
+                    //     if (d > 30) {
+                    //         const petal = new Petal(Math.random() * wStep + i * wStep, 0, Math.random() * Math.PI);
+                    //     }
+
+                    // })
+                }
+
+                count++;
+            }
+
+            renderFrame();
+            musicBallRotateSpeed = Plate.angleStep / (60 * sampleRate);
+        }
     }
 }

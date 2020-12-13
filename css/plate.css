@@ -22,6 +22,10 @@
     animation-name: null;
 }
 
+.focus-ani-bubble .element-img {
+    opacity: 1 ! important;
+}
+
 .hidden-ani-bubble {
     animation-name: hidden-ani;
 }
