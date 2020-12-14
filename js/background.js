@@ -17,8 +17,23 @@ class Background {
         document.body.style.background = bgColorStr;
     }
 
+    static hideBg() {
+        window.cancelAnimationFrame(Star.ani);
+        window.cancelAnimationFrame(Cloud.ani);
+        const canvas = document.getElementById('bgContainer');
+        const ctx = canvas.getContext('2d');
+        // console.log(document.body.offsetWidth, canvas, ctx);
+        ctx.clearRect(0, 0, document.body.offsetWidth, document.body.offsetHeight);
+        document.body.className = 'default-bg';
+    }
+
     static drawStars() {
         Star.initAllStars();
         Star.animateAllStars();
+    }
+
+    static drawClouds() {
+        Cloud.initAllClouds();
+        Cloud.animateAllClouds();
     }
 }

@@ -3,11 +3,30 @@ html, body {
 }
 
 body {
-    background-color: #000;
     margin: 0;
     font-family: Helvetica, sans-serif;
     overflow: hidden;
     transition: background-color 3s cubic-bezier(0.445, 0.05, 0.55, 0.95);
+}
+
+.default-bg {
+    background-image: linear-gradient(to top, #163e87, #123b7f, #0f3977, #0d366f, #0c3367, #0b2f60, #092a58, #082651, #051f49, #031941, #02123a, #030732);
+}
+
+.green-bg {
+    background-image: linear-gradient(to top, #48641e, #5f761d, #79881b, #959a17, #b5ab12, #d4a020, #ec9538, #ff8a53, #fb7082, #d76cab, #9a74c1, #4c79bc);
+}
+
+.pink-bg {
+    background-image: linear-gradient(to top, #74292d, #893a43, #9e4c5b, #b25f74, #c6738e, #d0819e, #da8fad, #e39dbd, #e6a9c6, #e8b4ce, #ebc0d6, #eecbde);
+}
+
+.gold-bg {
+    background-image: linear-gradient(to top, #1f0d08, #3b1a14, #5a2619, #79341c, #99441d, #a94d1d, #b8571c, #c8611a, #cd651c, #d2691f, #d76e21, #dc7223);
+}
+
+.blue-bg {
+    background-image: linear-gradient(to top, #040624, #070f2e, #061638, #071b43, #07204e, #0c295c, #10336a, #143d78, #1d4e8d, #265fa1, #2d71b7, #3584cc);
 }
 
 a {
@@ -21,7 +40,7 @@ input, label {
     z-index: 99999;
 }
 
-input, audio {
+input, audio, video {
     display: none;
 }
 

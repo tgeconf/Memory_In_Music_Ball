@@ -9,9 +9,17 @@
     transition: width 1s cubic-bezier(0.445, 0.05, 0.55, 0.95), height 1s cubic-bezier(0.445, 0.05, 0.55, 0.95), opacity 1s cubic-bezier(0.445, 0.05, 0.55, 0.95);
 }
 
-.ani-bubble, .focus-ani-bubble, .hidden-ani-bubble {
+.element canvas {
+    border-radius: 50%;
+}
+
+.ani-bubble, .focus-ani-bubble, .hidden-ani-bubble , .big-bubble{
     animation-iteration-count: infinite;
     animation-direction: alternate;
+}
+
+.big-bubble{
+    animation-name: big-scale-ani;
 }
 
 .ani-bubble {
@@ -82,6 +90,10 @@
     transition: filter 0.3s cubic-bezier(0.455, 0.03, 0.515, 0.955), opacity 0.3s cubic-bezier(0.455, 0.03, 0.515, 0.955);
 }
 
+.element .hidden-img {
+    opacity: 0;
+}
+
 .highlight-element {
     animation-name: null ! important;
     width: 400px;
@@ -103,8 +115,12 @@
     left: 0px;
     width: 100%;
     height: 100%;
+    opacity: 0.3;
     border-radius: 50%;
-    box-shadow: 0 0 16px rgba(0, 255, 255, 0.25) inset;
+    /* box-shadow: 0 0 16px rgba(0, 255, 255, 0.25) inset; */
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+    animation-name: scale-ani;
 }
 
 @keyframes scale-ani {
@@ -115,6 +131,17 @@
     to {
         width: 172px;
         height: 188px;
+    }
+}
+
+@keyframes big-scale-ani {
+    from {
+        width: 1008px;
+        height: 992px;
+    }
+    to {
+        width: 992px;
+        height: 1008px;
     }
 }
 

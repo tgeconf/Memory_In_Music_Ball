@@ -1,6 +1,7 @@
 class Plate {
     static angleStep = 0.1;
     static plates = [];
+    static time = 'spring';
     static updateAll() {
         this.plates.forEach(p => {
             p.update();
@@ -10,14 +11,28 @@ class Plate {
     static highlight(category) {
         switch (category) {
             case 'spring':
+                Plate.time = 'spring';
+                document.body.className = 'green-bg';
+                Background.drawStars();
+                Meteor.init();
                 break;
             case 'summer':
-                Background.drawStars();
-                break;
-            case 'autumn':
+                Plate.time = 'summer';
+                document.body.className = 'pink-bg';
+                Background.drawClouds();
                 Petal.init();
                 break;
+            case 'autumn':
+                Plate.time = 'autumn';
+                document.body.className = 'gold-bg';
+                Background.drawClouds();
+                Maple.init();
+                break;
             case 'winter':
+                Plate.time = 'winter';
+                document.body.className = 'blue-bg';
+                Background.drawClouds();
+                Snow.init();
                 break;
         }
 
@@ -42,17 +57,17 @@ class Plate {
         })
 
         //pick color
-        const imgSrc = targetPlate.data.src;
-        const tmpImg = new Image();
-        console.log('loading image');
-        tmpImg.onload = () => {
-            ColorPicker.colorNum = 5;
-            const colorPicker = new ColorPicker(tmpImg);
-            colorPicker.pickPalette();
-            console.log('picked color: ', colorPicker.palette);
-            Background.changeBgColor(colorPicker.palette);
-        }
-        tmpImg.src = imgSrc;
+        // const imgSrc = targetPlate.data.src;
+        // const tmpImg = new Image();
+        // console.log('loading image');
+        // tmpImg.onload = () => {
+        //     ColorPicker.colorNum = 5;
+        //     const colorPicker = new ColorPicker(tmpImg);
+        //     colorPicker.pickPalette();
+        //     console.log('picked color: ', colorPicker.palette);
+        //     Background.changeBgColor(colorPicker.palette);
+        // }
+        // tmpImg.src = imgSrc;
 
     }
 
@@ -61,8 +76,7 @@ class Plate {
             p.highlighted = false;
             p.hidden = false;
         })
-        console.log('test');
-        Background.changeBgColor([[0, 0, 0]]);
+        document.body.className = 'default-bg';
     }
 
     static cancelLayout() {
@@ -139,6 +153,18 @@ class Plate {
             .start();
     }
 
+    static showImgs() {
+        this.plates.forEach(p => {
+            p.plateImg.classList.remove('hidden-img');
+        })
+    }
+
+    static hideImgs() {
+        this.plates.forEach(p => {
+            p.plateImg.classList.add('hidden-img');
+        })
+    }
+
     static moveTo(target, duration) {
         // const stepNum = duration;
         // target.forEach((t, i) => {
@@ -160,6 +186,7 @@ class Plate {
     constructor(data, scene) {
         this.data = data;
         this.plateDiv;
+        this.plateImg;
         this.plateObj;
         this.scene = scene;
         this.initOpacitySpeed = 0.01;
@@ -212,6 +239,33 @@ class Plate {
         }
     }
 
+    initBig(x, y, z, rx, ry, rz, size, color) {
+        this.plateDiv = document.createElement('div');
+        this.plateDiv.className = 'element big-bubble';
+        this.plateDiv.style.animationDuration = (Math.random() * 1 + 1) + 's';
+        this.plateDiv.style.width = size + 'px';
+        this.plateDiv.style.height = size + 'px';
+        this.plateDiv.style.opacity = 1;
+        this.plateDiv.style.boxShadow = '0px 0px 12px rgba(' + color.r + ',' + color.g + ',' + color.b + ',' + (Math.random() * 0.2 + 0.01) + ')';
+
+        const plateCover = document.createElement('img');
+        plateCover.className = 'element-cover';
+        plateCover.src = './img/bubble.png';
+        this.plateDiv.appendChild(plateCover);
+
+        this.plateObj = new THREE.CSS3DObject(this.plateDiv);
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.plateObj.position.x = x;
+        this.plateObj.position.y = y;
+        this.plateObj.position.z = z;
+        this.plateObj.rotation.x = rx;
+        this.plateObj.rotation.y = ry;
+        this.plateObj.rotation.z = rz;
+        this.scene.add(this.plateObj);
+    }
+
     init(x, y, z, rx, ry, rz, size, color) {
         this.plateDiv = document.createElement('div');
         this.plateDiv.className = 'element ani-bubble';
@@ -220,20 +274,24 @@ class Plate {
         // this.plateDiv.style.width = size + 'px';
         // this.plateDiv.style.height = size + 'px';
         // this.plateDiv.style.backgroundColor = 'rgba(0,127,127,' + (Math.random() * 0.5 + 0.25) + ')';
-        this.plateDiv.style.backgroundColor = 'rgba(' + color.r + ',' + color.g + ',' + color.b + ',' + (Math.random() * 0.1 + 0.1) + ')';
-        this.plateDiv.style.boxShadow = '0px 0px 6px rgba(' + color.r + ',' + color.g + ',' + color.b + ',' + (Math.random() * 0.2 + 0.01) + ')';
+        // this.plateDiv.style.backgroundColor = 'rgba(' + color.r + ',' + color.g + ',' + color.b + ',' + (Math.random() * 0.1 + 0.1) + ')';
+        this.plateDiv.style.boxShadow = '0px 0px 12px rgba(' + color.r + ',' + color.g + ',' + color.b + ',' + (Math.random() * 0.2 + 0.01) + ')';
         const that = this;
         this.plateDiv.onclick = (evt) => {
             that.handleClick(evt);
         }
 
-        const plateImg = document.createElement('div');
-        plateImg.className = 'element-img';
-        plateImg.style.backgroundImage = 'url(' + this.data.src + ')';
-        this.plateDiv.appendChild(plateImg);
+        this.plateImg = document.createElement('div');
+        this.plateImg.className = 'element-img hidden-img';
+        this.plateImg.style.backgroundImage = 'url(' + this.data.src + ')';
+        this.plateDiv.appendChild(this.plateImg);
 
-        const plateCover = document.createElement('div');
+        // const plateCover = document.createElement('div');
+        // plateCover.className = 'element-cover';
+        // this.plateDiv.appendChild(plateCover);
+        const plateCover = document.createElement('img');
         plateCover.className = 'element-cover';
+        plateCover.src = './img/bubble.png';
         this.plateDiv.appendChild(plateCover);
 
         this.plateObj = new THREE.CSS3DObject(this.plateDiv);
@@ -252,6 +310,7 @@ class Plate {
 
     handleClick(evt) {
         if (this.plateDiv.classList.contains('focus-ani-bubble')) {
+            Background.hideBg();
             this.pauseAudio();
             this.moveTo({ x: 0, y: 0, z: 0 }, { x: 1, y: 1 }, 2000);
             this.plateDiv.classList.add('ani-bubble');
@@ -263,6 +322,33 @@ class Plate {
             this.plateObj.position.y = this._position.y;
             this.plateObj.position.z = this._position.z;
         } else {
+            switch (this.data.season) {
+                case 'spring':
+                    Plate.time = 'spring';
+                    document.body.className = 'green-bg';
+                    Background.drawStars();
+                    Meteor.init();
+                    break;
+                case 'summer':
+                    Plate.time = 'summer';
+                    document.body.className = 'pink-bg';
+                    Background.drawClouds();
+                    Petal.init();
+                    break;
+                case 'autumn':
+                    Plate.time = 'autumn';
+                    document.body.className = 'gold-bg';
+                    Background.drawClouds();
+                    Maple.init();
+                    break;
+                case 'winter':
+                    Plate.time = 'winter';
+                    document.body.className = 'blue-bg';
+                    Background.drawClouds();
+                    Snow.init();
+                    break;
+            }
+
             this.loadAudio();
             this.moveTo({ x: 0, y: 0, z: 0 }, { x: 2, y: 2 }, 2000);
             this.plateDiv.classList.remove('ani-bubble');
@@ -371,7 +457,7 @@ class Plate {
         audio.load();
         audio.play();
         audio.onloadedmetadata = () => {
-            console.log('audio duration: ', audio.duration);
+            // console.log('audio duration: ', audio.duration);
             var context = new AudioContext();
             var src = context.createMediaElementSource(audio);
             var analyser = context.createAnalyser();
@@ -383,15 +469,13 @@ class Plate {
             var dataArray = new Uint8Array(bufferLength);
 
             let count = 0;
-            console.log('bufferlen: ', bufferLength);
-
             function renderFrame() {
                 requestAnimationFrame(renderFrame);
                 analyser.getByteFrequencyData(dataArray);
 
                 if (count % 6 === 0) {
                     const mergeNum = 8;
-                    const wStep = mergeNum * Petal.canvasW / dataArray.length;
+                    let petalNum = 0;
                     for (let i = 0; i < dataArray.length; i += mergeNum) {
                         let avg = 0;
                         for (let j = i; j < i + mergeNum; j++) {
@@ -399,25 +483,35 @@ class Plate {
                         }
                         avg /= mergeNum;
                         if (avg > 150) {
-                            const petal = new Petal(Math.random() * wStep + i * wStep / mergeNum, -20, Math.random() * Math.PI);
+                            petalNum++;
                         }
                     }
-
-                    // dataArray.forEach((d, i) => {
-                    //     const wStep = Petal.canvasW / dataArray.length;
-                    //     // for (let j = 0; j < d / 100; j++) {
-                    //     if (d > 30) {
-                    //         const petal = new Petal(Math.random() * wStep + i * wStep, 0, Math.random() * Math.PI);
-                    //     }
-
-                    // })
+                    let startFreIdx = Math.floor(dataArray.length / mergeNum / 2 - petalNum / 2);
+                    for (let i = 0; i < petalNum; i++) {
+                        switch (Plate.time) {
+                            case 'spring':
+                                startFreIdx = Math.floor(3 * dataArray.length / mergeNum / 4 - petalNum / 2);
+                                const wStepm = mergeNum * Meteor.canvasW / dataArray.length;
+                                const meteor = new Meteor(Math.random() * wStepm + (i + startFreIdx) * wStepm, -20);
+                                break;
+                            case 'summer':
+                                const wStepp = mergeNum * Petal.canvasW / dataArray.length;
+                                const petal = new Petal(Math.random() * wStepp + (i + startFreIdx) * wStepp, -20, Math.random() * Math.PI);
+                                break;
+                            case 'autumn':
+                                const wStepl = mergeNum * Maple.canvasW / dataArray.length;
+                                const leaf = new Maple(Math.random() * wStepl + (i + startFreIdx) * wStepl, -20, Math.random() * Math.PI);
+                                break;
+                            case 'winter':
+                                const wSteps = mergeNum * Snow.canvasW / dataArray.length;
+                                const snow = new Snow(Math.random() * wSteps + (i + startFreIdx) * wSteps, -20, Math.random() * Math.PI);
+                                break;
+                        }
+                    }
                 }
-
                 count++;
             }
-
             renderFrame();
-            musicBallRotateSpeed = Plate.angleStep / (60 * sampleRate);
         }
     }
 }

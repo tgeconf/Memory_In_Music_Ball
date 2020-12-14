@@ -1,57 +1,68 @@
 class Meteor {
+    static ctx;
+    static canvasW;
+    static canvasH;
     static meteors = [];
 
+    static init() {
+        const canvas = document.getElementById('musicPatternContainer');
+        this.canvasW = canvas.width = document.body.offsetWidth;
+        this.canvasH = canvas.height = document.body.offsetHeight;
+        this.ctx = canvas.getContext('2d');
+        window.requestAnimationFrame(this.updateAll);
+    }
+
     static updateAll() {
+        Meteor.ctx.clearRect(0, 0, Meteor.canvasW, Meteor.canvasH);
         const removeIdx = [];
-        this.meteors.forEach((m, i) => {
-            const remove = m.update();
-            if (remove) {
+        Meteor.meteors.forEach((p, i) => {
+            const inScene = p.update();
+            if (!inScene) {
                 removeIdx.push(i);
             }
         })
-        const that = this;
-        removeIdx.reverse().forEach(idx => {
-            that.meteors.splice(idx, 1);
+        removeIdx.reverse().forEach(i => {
+            Meteor.meteors.splice(i, 1);
         })
+        window.requestAnimationFrame(Meteor.updateAll);
     }
-    constructor(scene) {
-        this.x = Math.random() * SCENE_X - SCENE_X / 3;
-        this.y = SCENE_Y / 2;
-        this.z = SCENE_Z / 2 - SCENE_Z / 2;
-        this.len = Math.random() * 250 + 100;
-        this.speed = -Math.random() * 50 - 10;
-        this.star;
-        this.starObj;
-        this.tail;
-        this.tailObj;
-        this.group;
-        this.scene = scene;
-    }
-    init() {
-        this.star = document.createElement('div');
-        this.star.className = 'meteor-star';
-        this.tail = document.createElement('div');
-        this.tail.style.width = this.len + 'px';
-        this.tail.className = 'meteor-tail';
-        this.starObj = new THREE.CSS3DObject(this.star);
-        this.starObj.position.x = -this.len / 2;
-        this.tailObj = new THREE.CSS3DObject(this.tail);
-        this.group = new THREE.Group();
-        this.group.position.x = this.x;
-        this.group.position.y = this.y;
-        this.group.position.z = this.z;
-        this.group.rotation.z = Math.PI / 4;
-        this.group.add(this.starObj);
-        this.group.add(this.tailObj);
-        this.scene.add(this.group);
+
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.width = Math.random() * 100 + 100;
+        this.speed = -(Math.random() * 10 + 10);
         Meteor.meteors.push(this);
     }
     update() {
-        this.group.position.x += this.speed;
-        this.group.position.y += this.speed;
-        if (this.group.position.x < -Meteor.sceneRangeX) {
-            return true;
+        this.x += this.speed;
+        this.y += -this.speed;
+
+        Meteor.ctx.save();
+        Meteor.ctx.translate(this.x, this.y);
+        Meteor.ctx.rotate(-Math.PI / 4);
+        Meteor.ctx.fillStyle = 'rgba(255, 255, 255, .7)';
+        Meteor.ctx.shadowBlur = 10;
+        Meteor.ctx.shadowColor = 'rgba(255, 255, 255, 0.5)';
+        Meteor.ctx.beginPath();
+        Meteor.ctx.arc(0, 0, 4, 0, Math.PI * 2);
+        Meteor.ctx.closePath();
+        Meteor.ctx.fill();
+
+        const gradient = Meteor.ctx.createLinearGradient(0, 0, this.width, 0);
+        gradient.addColorStop(0, "rgba(255, 255, 255, .5)");
+        gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+
+        Meteor.ctx.fillStyle = gradient;
+        Meteor.ctx.beginPath();
+        Meteor.ctx.rect(2, -2, this.width, 4);
+        Meteor.ctx.fill();
+
+        Meteor.ctx.restore();
+
+        if (this.y > Meteor.canvasH + 30) {
+            return false;
         }
-        return false;
+        return true;
     }
 }

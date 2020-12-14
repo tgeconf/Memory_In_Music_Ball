@@ -1,8 +1,8 @@
-class Petal {
+class Maple {
     static ctx;
     static canvasW;
     static canvasH;
-    static patels = [];
+    static leaves = [];
 
     static init() {
         const canvas = document.getElementById('musicPatternContainer');
@@ -13,18 +13,18 @@ class Petal {
     }
 
     static updateAll() {
-        Petal.ctx.clearRect(0, 0, Petal.canvasW, Petal.canvasH);
+        Maple.ctx.clearRect(0, 0, Maple.canvasW, Maple.canvasH);
         const removeIdx = [];
-        Petal.patels.forEach((p, i) => {
+        Maple.leaves.forEach((p, i) => {
             const inScene = p.update();
             if (!inScene) {
                 removeIdx.push(i);
             }
         })
         removeIdx.reverse().forEach(i => {
-            Petal.patels.splice(i, 1);
+            Maple.leaves.splice(i, 1);
         })
-        window.requestAnimationFrame(Petal.updateAll);
+        window.requestAnimationFrame(Maple.updateAll);
     }
 
     constructor(x, y, rotation) {
@@ -35,33 +35,33 @@ class Petal {
         this.xSpeed = Math.random() - 0.5;
         this.ySpeed = Math.random() * 0.5 + 1;
         this.rSpeed = Math.PI / 180;
-        Petal.patels.push(this);
+        Maple.leaves.push(this);
     }
     update() {
         this.x += this.xSpeed;
         this.y += this.ySpeed;
         this.rotation += this.rSpeed;
 
-        Petal.ctx.save();
-        Petal.ctx.translate(this.x, this.y);
-        Petal.ctx.rotate(this.rotation);
-        Petal.ctx.beginPath();
-        Petal.ctx.moveTo(0, 0);
-        Petal.ctx.quadraticCurveTo(this.width / 2, this.width / 2, this.width, 0);
-        Petal.ctx.quadraticCurveTo(this.width / 2, -1 * (this.width / 2), 0, 0);
-        Petal.ctx.closePath();
+        Maple.ctx.save();
+        Maple.ctx.translate(this.x, this.y);
+        Maple.ctx.rotate(this.rotation);
+        Maple.ctx.beginPath();
+        Maple.ctx.moveTo(0, 0);
+        Maple.ctx.quadraticCurveTo(this.width / 2, this.width / 2, this.width, 0);
+        Maple.ctx.quadraticCurveTo(this.width / 2, -1 * (this.width / 2), 0, 0);
+        Maple.ctx.closePath();
 
-        var gradient = Petal.ctx.createLinearGradient(0, 0, 170, 0);
-        gradient.addColorStop(0, "rgba(255, 183, 197, .8)");
-        gradient.addColorStop(1, "rgba(255, 183, 197, .8)");
+        var gradient = Maple.ctx.createLinearGradient(0, 0, 170, 0);
+        gradient.addColorStop(0, "rgba(238, 59, 11, .8)");
+        gradient.addColorStop(1, "rgba(238, 17, 11, .8)");
 
-        Petal.ctx.lineJoin = "round";
-        Petal.ctx.fillStyle = gradient;
-        Petal.ctx.fill();
+        Maple.ctx.lineJoin = "round";
+        Maple.ctx.fillStyle = gradient;
+        Maple.ctx.fill();
 
-        Petal.ctx.restore();
+        Maple.ctx.restore();
 
-        if (this.y > Petal.canvasH + 30) {
+        if (this.y > Maple.canvasH + 30) {
             return false;
         }
         return true;

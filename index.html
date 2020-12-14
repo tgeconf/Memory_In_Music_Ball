@@ -12,7 +12,7 @@
     <script type="text/javascript" src="./js/aida/mouth/index.js"></script>
 </head>
 
-<body>
+<body class='default-bg'>
     <script type="text/javascript" src="./js/aida/awake.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
     <script src="js/global.js"></script>
@@ -25,140 +25,68 @@
     <script src="js/background.js"></script>
     <script src="js/star.js"></script>
     <script src="js/petal.js"></script>
+    <script src="js/maple.js"></script>
+    <script src="js/snow.js"></script>
+    <script src="js/cloud.js"></script>
+    <script src="js/meteor.js"></script>
     <label for="thefile" class="custom-file-upload">
         Upload
     </label>
     <input type="file" id="thefile" accept="audio/*" />
     <audio id="audio"></audio>
-    <img id='testImg' class='color-material' src='./img/test2.jpg' />
+    <video id="video" autoplay="true"></video>
+    <img id='testImg' class='color-material' src='./img/cloud.png' />
     <canvas id='bgContainer' class='bg-container'></canvas>
     <canvas id='musicPatternContainer' class='bg-container'></canvas>
     <div id="container" class='container'></div>
-    <!-- <div id="menu">
-        <button id="table">TABLE</button>
-        <button id="sphere">SPHERE</button>
-        <button id="helix">HELIX</button>
-        <button id="grid">GRID</button>
-    </div> -->
+
     <script src='./js/pickImgColors.js'></script>
     <script>
-
         let musicBall, musicBallRotateSpeed = 0, sampleRate = 2;
 
-        let camera, scene, renderer;
+        let camera, scene, renderer, cameraPlate;
         let controls;
 
         let objects = [];
         let targets = { table: [], sphere: [], helix: [], grid: [] };
 
-        const rScale = (val) => {
-            return Math.pow(val / 255, 4) * 100;
-            // return 0 + 70 * val / 255;
-        }
-
-        const loadAudio = (file) => {
-            const audio = document.getElementById('audio');
-            audio.src = URL.createObjectURL(file);
-            audio.load();
-            audio.play();
-            audio.onloadedmetadata = () => {
-                console.log('audio duration: ', audio.duration);
-                Plate.angleStep = Math.PI * 2 / (audio.duration / sampleRate);
-                var context = new AudioContext();
-                var src = context.createMediaElementSource(audio);
-                var analyser = context.createAnalyser();
-
-                src.connect(analyser);
-                analyser.connect(context.destination);
-                analyser.fftSize = 256;
-                var bufferLength = analyser.frequencyBinCount;
-                var dataArray = new Uint8Array(bufferLength);
-
-                let count = 0;
-                let voiceCount = 0;
-                let preAllVoiceSum = 0;
-                let voiceRise = 0;
-                let preVoice = 1;
-                let rising = false;
-                const voiceStep = 10;
-                ColorPicker.colorNum = Math.ceil((bufferLength - 2 * voiceStep) / voiceStep + 1);
-                const colorPicker = new ColorPicker(document.getElementById('testImg'));
-                colorPicker.pickPalette();
-                console.log('bufferlen: ', bufferLength, ColorPicker.colorNum, colorPicker.palette);
-
-                function renderFrame() {
-                    requestAnimationFrame(renderFrame);
-                    analyser.getByteFrequencyData(dataArray);
-                    // if (count % (sampleRate * 60) === 0) {
-                    //     var vector = new THREE.Vector3();
-                    //     var spherical = new THREE.Spherical();
-                    //     for (var i = voiceStep, l = dataArray.length - voiceStep; i < l; i += voiceStep) {
-                    //         let avgVoice = 0;
-                    //         const targetColor = colorPicker.palette[i / voiceStep - 1];
-                    //         for (let j = 0; j < voiceStep; j++) {
-                    //             avgVoice += dataArray[i + j];
-                    //         }
-                    //         avgVoice /= voiceStep;
-                    //         const phi = i * Math.PI / l;
-                    //         const theta = voiceCount * Plate.angleStep;
-                    //         var targetObj = new THREE.Object3D();
-                    //         spherical.set(200, phi, theta);
-                    //         targetObj.position.setFromSpherical(spherical);
-                    //         vector.copy(targetObj.position).multiplyScalar(2);
-                    //         targetObj.lookAt(vector);
-                    //         // targets.sphere.push(targetObj);
-
-                    //         const size = rScale(avgVoice);
-                    //         if (size > 0) {
-                    //             const plate = new Plate();
-                    //             plate.init(
-                    //                 targetObj.position.x,
-                    //                 targetObj.position.y,
-                    //                 targetObj.position.z,
-                    //                 targetObj.rotation.x,
-                    //                 targetObj.rotation.y,
-                    //                 targetObj.rotation.z,
-                    //                 size,
-                    //                 { r: targetColor[0], g: targetColor[1], b: targetColor[2] });
-                    //             musicBall.add(plate.plateObj);
-                    //         }
-                    //     }
-                    //     voiceCount++;
-                    // }
-
-                    count++;
-                }
-
-                renderFrame();
-                musicBallRotateSpeed = Plate.angleStep / (60 * sampleRate);
+        const loadCameraOnHidden = () => {
+            const canvas = document.getElementById('cameraCanvas');
+            const video = document.getElementById('video');
+            const ctx = canvas.getContext('2d');
+            if (navigator.mediaDevices.getUserMedia) {
+                var successCallback = function (stream) {
+                    video.srcObject = stream;
+                };
+                var errorCallback = function (error) {
+                    console.log(error);
+                };
+                navigator.mediaDevices.getUserMedia({
+                    audio: false,
+                    video: { facingMode: 'environment' }
+                }).then(successCallback, errorCallback);
+                requestAnimationFrame(renderFrame);
             }
 
+            function renderFrame() {
+                requestAnimationFrame(renderFrame);
+                if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                    ctx.drawImage(video, 0, 0, 1600, 1200);
+                }
+            }
+            renderFrame();
         }
-
-        var file = document.getElementById("thefile");
-        file.onchange = function () {
-            var files = this.files;
-            loadAudio(files[0]);
-        }
-
 
         init();
         animate();
+        loadCameraOnHidden();
 
         function init() {
             camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1, 10000);
             camera.position.z = 2000;
-
             scene = new THREE.Scene();
 
-            // musicBall = new THREE.Group();
-            // musicBall.position.x = 0;
-            // musicBall.position.y = 0;
-            // musicBall.position.z = 0;
-            // scene.add(musicBall);
-            // table
             for (var i = 0; i < photos.length; i++) {
-
                 const plate = new Plate(photos[i], scene);
                 plate.init(
                     Math.random() * SCENE_X - SCENE_X / 2,
@@ -169,95 +97,26 @@
                     0,
                     1000,
                     { r: 0, g: 127, b: 127 });
-
-                // var element = document.createElement('div');
-                // element.className = 'element';
-                // element.style.backgroundColor = 'rgba(0,127,127,' + (Math.random() * 0.5 + 0.25) + ')';
-
-                // var object = new THREE.CSS3DObject(element);
-                // object.position.x = Math.random() * 4000 - 2000;
-                // object.position.y = Math.random() * 4000 - 2000;
-                // object.position.z = Math.random() * 4000 - 2000;
-                // scene.add(object);
-
-                // objects.push(object);
-
-                //
-
-                // var object = new THREE.Object3D();
-                // object.position.x = (table[i + 3] * 140) - 1330;
-                // object.position.y = - (table[i + 4] * 180) + 990;
-
-                // targets.table.push(object);
-
             }
 
-            // sphere
-            // var vector = new THREE.Vector3();
-            // var spherical = new THREE.Spherical();
+            const videoSize = 1000;
+            const cameraCanvas = document.createElement('canvas');
+            cameraCanvas.id = 'cameraCanvas';
+            cameraCanvas.width = videoSize;
+            cameraCanvas.height = videoSize;
 
-            // for (var i = 0, l = table.length / 5; i < l; i++) {
-            //     // var element = document.createElement('div');
-            //     // element.className = 'element';
-            //     // element.style.backgroundColor = 'rgba(0,127,127,' + (Math.random() * 0.5 + 0.25) + ')';
-            //     // var object = new THREE.CSS3DObject(element);
-            //     // object.position.x = Math.random() * 4000 - 2000;
-            //     // object.position.y = Math.random() * 4000 - 2000;
-            //     // object.position.z = Math.random() * 4000 - 2000;
+            cameraPlate = new Plate({}, scene);
+            cameraPlate.initBig(
+                -Math.random() * SCENE_X / 2,
+                Math.random() * SCENE_Y/2 - SCENE_Y / 4,
+                -Math.random() * SCENE_Z - 2,
+                0,
+                0,
+                0,
+                1000,
+                { r: 0, g: 127, b: 127 });
+            cameraPlate.plateDiv.prepend(cameraCanvas);
 
-
-            //     var phi = Math.acos(-1 + (2 * i) / l);
-            //     // var theta = Math.sqrt(l * Math.PI) * phi;
-            //     var theta = Math.PI / 2 * (i % 4);
-            //     var targetObj = new THREE.Object3D();
-            //     spherical.set(800, phi, theta);
-            //     targetObj.position.setFromSpherical(spherical);
-            //     vector.copy(targetObj.position).multiplyScalar(2);
-            //     targetObj.lookAt(vector);
-            //     targets.sphere.push(targetObj);
-
-            //     // const plate = new Plate();
-            //     // plate.init(targetObj.position.x, targetObj.position.y, targetObj.position.z, targetObj.rotation.x, targetObj.rotation.y, targetObj.rotation.z);
-            //     // musicBall.add(plate.plateObj);
-            //     // objects.push(plate.plateObj);
-            // }
-
-            // // helix
-            // var vector = new THREE.Vector3();
-            // var cylindrical = new THREE.Cylindrical();
-
-            // for (var i = 0, l = objects.length; i < l; i++) {
-
-            //     var theta = i * 0.175 + Math.PI;
-            //     var y = - (i * 8) + 450;
-
-            //     var object = new THREE.Object3D();
-
-            //     cylindrical.set(900, theta, y);
-
-            //     object.position.setFromCylindrical(cylindrical);
-
-            //     vector.x = object.position.x * 2;
-            //     vector.y = object.position.y;
-            //     vector.z = object.position.z * 2;
-
-            //     object.lookAt(vector);
-
-            //     targets.helix.push(object);
-
-            // }
-
-            // // grid
-            // for (var i = 0; i < objects.length; i++) {
-            //     var object = new THREE.Object3D();
-
-            //     object.position.x = ((i % 5) * 400) - 800;
-            //     object.position.y = (- (Math.floor(i / 5) % 5) * 400) + 800;
-            //     object.position.z = (Math.floor(i / 25)) * 1000 - 2000;
-
-            //     targets.grid.push(object);
-
-            // }
             renderer = new THREE.CSS3DRenderer();
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.domElement.style.position = 'absolute';
@@ -269,83 +128,28 @@
             controls.maxDistance = 6000;
             controls.addEventListener('change', render);
 
-            // var button = document.getElementById('sphere');
-            // button.addEventListener('click', function (event) {
-            //     Plate.moveTo(targets.sphere, 100);
-            // }, false);
-
-            // var button = document.getElementById('helix');
-            // button.addEventListener('click', function (event) {
-            //     Plate.moveTo(targets.helix, 100);
-            // }, false);
-
-            // var button = document.getElementById('grid');
-            // button.addEventListener('click', function (event) {
-            //     Plate.moveTo(targets.grid, 100);
-            // }, false);
-
-            // Plate.moveTo(targets.sphere, 100);
-            // transform(targets.helix, 2000);
             window.addEventListener('resize', onWindowResize, false);
         }
 
-        function transform(targets, duration) {
-
-            TWEEN.removeAll();
-
-            for (var i = 0; i < Plate.plates.length; i++) {
-
-                var object = Plate.plates[i].plateObj;
-                var target = targets[i];
-
-                new TWEEN.Tween(object.position)
-                    .to({ x: target.position.x, y: target.position.y, z: target.position.z }, Math.random() * duration + duration)
-                    .easing(TWEEN.Easing.Exponential.InOut)
-                    .start();
-
-                new TWEEN.Tween(object.rotation)
-                    .to({ x: target.rotation.x, y: target.rotation.y, z: target.rotation.z }, Math.random() * duration + duration)
-                    .easing(TWEEN.Easing.Exponential.InOut)
-                    .start();
-
-            }
-
-            new TWEEN.Tween(this)
-                .to({}, duration * 2)
-                .onUpdate(render)
-                .start();
-
-        }
-
         function onWindowResize() {
-
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
-
             renderer.setSize(window.innerWidth, window.innerHeight);
-
             render();
-
         }
 
         function animate() {
             requestAnimationFrame(animate);
             Plate.updateAll();
-            // musicBall.rotation.y -= musicBallRotateSpeed;
             controls.update();
             render();
             TWEEN.update();
         }
 
         function render() {
-
             renderer.render(scene, camera);
-
         }
-
     </script>
-
-
 </body>
 
 </html>

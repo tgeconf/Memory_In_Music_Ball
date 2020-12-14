@@ -11,6 +11,7 @@ class Star {
     static C_WIDTH;
     static C_HEIGHT;
     static arrStars = [];
+    static ani;
 
     static randColor() {
         const arrColors = ["ffffff", "ffecd3", "bfcfff"];
@@ -20,6 +21,7 @@ class Star {
     static initAllStars() {
         const canvas = document.getElementById("bgContainer");
         this.context = canvas.getContext("2d");
+        this.context.globalAlpha = 1;
 
         this.C_WIDTH = canvas.width = document.body.offsetWidth;
         this.C_HEIGHT = canvas.height = document.body.offsetHeight;
@@ -48,7 +50,7 @@ class Star {
         for (let i = 0; i < Star.arrStars.length; i++) {
             Star.arrStars[i].render();
         }
-        requestAnimationFrame(Star.animateAllStars);
+        Star.ani = requestAnimationFrame(Star.animateAllStars);
     }
 
     opacityScale(val) {
