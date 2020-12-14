@@ -1,5 +1,5 @@
 const photos = [
-    { src: './img/photos/spring1.jpg', date: '2019-03-13', time: '09:00', season: 'spring' },
+    { src: './img/photos/spring1.jpg', date: '2019-03-13', time: '09:00', season: 'spring', class: 'dog', musicSrc:'./media/testMusic.mp3' },
     { src: './img/photos/spring2.jpg', date: '2019-03-15', time: '10:00', season: 'spring' },
     { src: './img/photos/spring3.jpg', date: '2019-04-13', time: '12:00', season: 'spring' },
     { src: './img/photos/spring4.jpg', date: '2019-04-17', time: '16:00', season: 'spring' },
