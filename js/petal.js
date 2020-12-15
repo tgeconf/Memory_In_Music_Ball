@@ -30,7 +30,7 @@ class Petal {
     constructor(x, y, rotation) {
         this.x = x;
         this.y = y;
-        this.width = Math.random() * 6 + 18;
+        this.width = Math.random() * 10 + 8;
         this.rotation = rotation;
         this.xSpeed = Math.random() - 0.5;
         this.ySpeed = Math.random() * 0.5 + 1;

@@ -19,7 +19,7 @@ body {
 }
 
 .pink-bg {
-    background-image: linear-gradient(to bottom, #f4618b, #f77995, #f98fa1, #faa5ae, #fab9bd, #f7c1ca, #f3cad5, #efd2de, #e6d2e4, #dbd3e7, #d0d3e7, #c6d4e5);
+    background-image: linear-gradient(to bottom, #f45c65, #f57579, #f58c8d, #f3a1a2, #f0b6b6, #eebfc3, #eac8ce, #e7d1d7, #e4d1dc, #e0d2e0, #dbd4e4, #d5d5e6);
     /* background-image: linear-gradient(to top, #74292d, #893a43, #9e4c5b, #b25f74, #c6738e, #d0819e, #da8fad, #e39dbd, #e6a9c6, #e8b4ce, #ebc0d6, #eecbde); */
 }
 

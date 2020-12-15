@@ -30,6 +30,7 @@ class Plate {
                 Plate.plates.forEach(p => {
                     p.plateCover.src = './img/b_spring.png';
                 })
+                cameraPlate.plateCover.src = './img/b_spring.png';
                 break;
             case 'summer':
                 Plate.time = 'summer';
@@ -39,6 +40,7 @@ class Plate {
                 Plate.plates.forEach(p => {
                     p.plateCover.src = './img/b_summer.png';
                 })
+                cameraPlate.plateCover.src = './img/b_summer.png';
                 break;
             case 'autumn':
                 Plate.time = 'autumn';
@@ -48,6 +50,7 @@ class Plate {
                 Plate.plates.forEach(p => {
                     p.plateCover.src = './img/b_autumn.png';
                 })
+                cameraPlate.plateCover.src = './img/b_autumn.png';
                 break;
             case 'winter':
                 Plate.time = 'winter';
@@ -57,6 +60,7 @@ class Plate {
                 Plate.plates.forEach(p => {
                     p.plateCover.src = './img/b_winter.png';
                 })
+                cameraPlate.plateCover.src = './img/b_winter.png';
                 break;
         }
     }
@@ -244,6 +248,8 @@ class Plate {
         this.heartSpans = [];
         this.heartDelay = 0;
         this.creatingHeart = false;
+        const feels = ['angry', 'embarassed', 'glad', 'good', 'happy', 'heart', 'suprise'];
+        this.feel = 'url("./img/' + feels[Math.floor(Math.random() * 7)] + '.png")';
     }
 
     get highlighted() {
@@ -508,7 +514,9 @@ class Plate {
 
     loadAudio() {
         const audio = document.getElementById('audio');
-        audio.src = './media/testMusic.mp3';
+        audio.src = './media/testMusic' + Math.floor(Math.random() * 8 + 1) + '.mp3';
+        // audio.src = this.data.musicSrc;
+        // audio.src = './media/testMusic.mp3';
         audio.load();
         audio.play();
         audio.onloadedmetadata = () => {
@@ -573,7 +581,8 @@ class Plate {
     createHeart() {
         const heartSpan = document.createElement('div');
         heartSpan.className = 'heart';
-        heartSpan.style.backgroundImage = 'url("' + this.data.feel + '")';
+        heartSpan.style.backgroundImage = this.feel;
+        // heartSpan.style.backgroundImage = 'url("' + this.data.feel + '")';
         heartSpan.style.opacity = 1;
         const heartObj = new THREE.CSS3DObject(heartSpan);
         heartObj.position.x = this.plateObj.position.x;

@@ -28,6 +28,7 @@ class Background {
         Plate.plates.forEach(p => {
             p.plateCover.src = './img/bubble.png';
         })
+        cameraPlate.plateCover.src = './img/bubble.png';
     }
 
     static drawStars() {

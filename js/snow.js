@@ -49,6 +49,8 @@ class Snow {
 
         // Snow.ctx.globalOpacity = 0.5;
         Snow.ctx.fillStyle = "rgba(255,255,255," + this.opacity + ")";
+        Snow.ctx.shadowBlur = 6;
+        Snow.ctx.shadowColor = 'rgba(255, 255, 255, 1)';
         Snow.ctx.beginPath();
         Snow.ctx.arc(this.x, this.y, this.width, 0, Math.PI * 2);
         Snow.ctx.closePath();
