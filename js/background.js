@@ -25,6 +25,9 @@ class Background {
         // console.log(document.body.offsetWidth, canvas, ctx);
         ctx.clearRect(0, 0, document.body.offsetWidth, document.body.offsetHeight);
         document.body.className = 'default-bg';
+        Plate.plates.forEach(p => {
+            p.plateCover.src = './img/bubble.png';
+        })
     }
 
     static drawStars() {

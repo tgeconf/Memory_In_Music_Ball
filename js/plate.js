@@ -7,7 +7,7 @@ class Plate {
             if (cmd.showLike && p.data.feel !== '') {
                 p.creatingHeart = true;
             }
-            if(cmd.showComment){
+            if (cmd.showComment) {
                 p.createComment();
             }
             p.update();
@@ -20,33 +20,49 @@ class Plate {
         }
     }
 
-    static highlight(category) {
-        switch (category) {
+    static season(s) {
+        switch (s) {
             case 'spring':
                 Plate.time = 'spring';
                 document.body.className = 'green-bg';
                 Background.drawStars();
                 Meteor.init();
+                Plate.plates.forEach(p => {
+                    p.plateCover.src = './img/b_spring.png';
+                })
                 break;
             case 'summer':
                 Plate.time = 'summer';
                 document.body.className = 'pink-bg';
                 Background.drawClouds();
                 Petal.init();
+                Plate.plates.forEach(p => {
+                    p.plateCover.src = './img/b_summer.png';
+                })
                 break;
             case 'autumn':
                 Plate.time = 'autumn';
                 document.body.className = 'gold-bg';
                 Background.drawClouds();
                 Maple.init();
+                Plate.plates.forEach(p => {
+                    p.plateCover.src = './img/b_autumn.png';
+                })
                 break;
             case 'winter':
                 Plate.time = 'winter';
                 document.body.className = 'blue-bg';
                 Background.drawClouds();
                 Snow.init();
+                Plate.plates.forEach(p => {
+                    p.plateCover.src = './img/b_winter.png';
+                })
                 break;
         }
+    }
+
+    static highlight(category) {
+        this.season(category);
 
         let targetPlate;
         this.plates.forEach(p => {
@@ -88,7 +104,7 @@ class Plate {
             p.highlighted = false;
             p.hidden = false;
         })
-        document.body.className = 'default-bg';
+        Background.hideBg();
     }
 
     static cancelLayout() {
@@ -199,6 +215,7 @@ class Plate {
         this.data = data;
         this.plateDiv;
         this.plateImg;
+        this.plateCover;
         this.plateObj;
         this.scene = scene;
         this.initOpacitySpeed = 0.01;
@@ -270,10 +287,10 @@ class Plate {
         this.plateDiv.style.opacity = 1;
         this.plateDiv.style.boxShadow = '0px 0px 12px rgba(' + color.r + ',' + color.g + ',' + color.b + ',' + (Math.random() * 0.2 + 0.01) + ')';
 
-        const plateCover = document.createElement('img');
-        plateCover.className = 'element-cover';
-        plateCover.src = './img/bubble.png';
-        this.plateDiv.appendChild(plateCover);
+        this.plateCover = document.createElement('img');
+        this.plateCover.className = 'element-cover';
+        this.plateCover.src = './img/bubble.png';
+        this.plateDiv.appendChild(this.plateCover);
 
         this.plateObj = new THREE.CSS3DObject(this.plateDiv);
         this.x = x;
@@ -311,10 +328,10 @@ class Plate {
         // const plateCover = document.createElement('div');
         // plateCover.className = 'element-cover';
         // this.plateDiv.appendChild(plateCover);
-        const plateCover = document.createElement('img');
-        plateCover.className = 'element-cover';
-        plateCover.src = './img/bubble.png';
-        this.plateDiv.appendChild(plateCover);
+        this.plateCover = document.createElement('img');
+        this.plateCover.className = 'element-cover';
+        this.plateCover.src = './img/bubble.png';
+        this.plateDiv.appendChild(this.plateCover);
 
         this.plateObj = new THREE.CSS3DObject(this.plateDiv);
         // this.plateObj.position.x = Math.random() * 4000 - 2000;
@@ -344,32 +361,7 @@ class Plate {
             this.plateObj.position.y = this._position.y;
             this.plateObj.position.z = this._position.z;
         } else {
-            switch (this.data.season) {
-                case 'spring':
-                    Plate.time = 'spring';
-                    document.body.className = 'green-bg';
-                    Background.drawStars();
-                    Meteor.init();
-                    break;
-                case 'summer':
-                    Plate.time = 'summer';
-                    document.body.className = 'pink-bg';
-                    Background.drawClouds();
-                    Petal.init();
-                    break;
-                case 'autumn':
-                    Plate.time = 'autumn';
-                    document.body.className = 'gold-bg';
-                    Background.drawClouds();
-                    Maple.init();
-                    break;
-                case 'winter':
-                    Plate.time = 'winter';
-                    document.body.className = 'blue-bg';
-                    Background.drawClouds();
-                    Snow.init();
-                    break;
-            }
+            Plate.season(this.data.season);
 
             this.loadAudio();
             this.moveTo({ x: 0, y: 0, z: 0 }, { x: 2, y: 2 }, 2000);
