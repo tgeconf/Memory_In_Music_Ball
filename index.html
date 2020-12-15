@@ -41,6 +41,17 @@
     <div id="container" class='container'></div>
     <button onclick='showLike()' style='top: 10px; left: 10px;'>like</button>
     <button onclick='showComment()' style='top: 40px; left: 10px;'>comment</button>
+    <button onclick='layoutTime()' style='top: 70px; left: 10px;'>layout</button>
+    <button onclick='cancelLayout()' style='top: 100px; left: 10px;'>c layout</button>
+    <button onclick='highlightSpring()' style='top: 130px; left: 10px;'>spring</button>
+    <button onclick='highlightSummer()' style='top: 160px; left: 10px;'>summer</button>
+    <button onclick='highlightAutumn()' style='top: 190px; left: 10px;'>autumn</button>
+    <button onclick='highlightWinter()' style='top: 220px; left: 10px;'>winter</button>
+    <button onclick='cancelSelection()' style='top: 250px; left: 10px;'>c select</button>
+    <button onclick='showImg()' style='top: 280px; left: 10px;'>show img</button>
+    <button onclick='hideImg()' style='top: 310px; left: 10px;'>hide img</button>
+    <button onclick='showMyself()' style='top: 340px; left: 10px;'>show video</button>
+    <button onclick='hideMyself()' style='top: 370px; left: 10px;'>hide video</button>
     <script src='./js/pickImgColors.js'></script>
     <script>
         function showLike() {
@@ -48,6 +59,39 @@
         }
         function showComment() {
             cmd.showComment = true;
+        }
+        function layoutTime() {
+            cmd.layoutTime = true;
+        }
+        function cancelLayout() {
+            cmd.cancelLayout = true;
+        }
+        function highlightSpring() {
+            cmd.highlight = 'spring';
+        }
+        function highlightSummer() {
+            cmd.highlight = 'summer';
+        }
+        function highlightAutumn() {
+            cmd.highlight = 'autumn';
+        }
+        function highlightWinter() {
+            cmd.highlight = 'winter';
+        }
+        function cancelSelection() {
+            cmd.cancelHighlight = true;
+        }
+        function showImg() {
+            cmd.showImg = true;
+        }
+        function hideImg() {
+            cmd.showImg = false;
+        }
+        function showMyself() {
+            cmd.showMyself = true;
+        }
+        function hideMyself() {
+            cmd.showMyself = false;
         }
 
         let musicBall, musicBallRotateSpeed = 0, sampleRate = 2;

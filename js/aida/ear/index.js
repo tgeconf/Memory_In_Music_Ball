@@ -49,7 +49,6 @@ ear.addCommands({
 			case 'selection':
 				if (i === 4) {
 					cmd.cancelHighlight = true;
-					Background.hideBg();
 				}
 				break;
 			case 'layout':

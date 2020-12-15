@@ -20,6 +20,7 @@ const cmd = new Proxy({}, {
             case 'cancelHighlight':
                 obj[prop] = value;
                 Plate.cancelHighlight();
+                Background.hideBg();
                 break;
             case 'showImg':
                 obj[prop] = value;

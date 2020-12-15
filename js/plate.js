@@ -591,7 +591,7 @@ class Plate {
         this.hearts.push(heartObj);
         this.scene.add(heartObj);
         this.heartNum++;
-        this.heartDelay = 20;
+        this.heartDelay = 30;
     }
 
     createComment() {
