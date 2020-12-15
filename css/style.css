@@ -84,6 +84,7 @@ button {
     border: 0px;
     padding: 5px 10px;
     cursor: pointer;
+    position: absolute;
 }
 
 button:hover {

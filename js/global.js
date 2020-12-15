@@ -29,6 +29,10 @@ const cmd = new Proxy({}, {
                 obj[prop] = value;
                 value ? cameraPlate.moveTo({ x: cameraPlate.x, y: cameraPlate.y, z: cameraPlate.z }, { x: 1, y: 1 }, 2000) : cameraPlate.moveTo({ x: -3000, y: 0, z: 0 }, { x: 1, y: 1 }, 2000);
                 break;
+            case 'showLike':
+            case 'showComment':
+                obj[prop] = value;
+                break;
         }
 
         // if (prop === 'cmdName') {

@@ -4,8 +4,20 @@ class Plate {
     static time = 'spring';
     static updateAll() {
         this.plates.forEach(p => {
+            if (cmd.showLike && p.data.feel !== '') {
+                p.creatingHeart = true;
+            }
+            if(cmd.showComment){
+                p.createComment();
+            }
             p.update();
         })
+        if (cmd.showLike) {
+            cmd.showLike = false;
+        }
+        if (cmd.showComment) {
+            cmd.showComment = false;
+        }
     }
 
     static highlight(category) {
@@ -200,11 +212,21 @@ class Plate {
         this.targetX;
         this.targetY;
         this.targetZ;
+        this.size = 180;
+        this.commentDelay = Math.floor(Math.random() * 50);
+        this.commentMoveDis = 0;
+        this.commentSpeed = 0;
+        this.commentLife = 0;
         this.targetRotationX;
         this.targetRotationY;
         this.targetRotationZ;
         this._highlighted = false;
         this._hidden = false;
+        this.heartNum = 0;
+        this.hearts = [];
+        this.heartSpans = [];
+        this.heartDelay = 0;
+        this.creatingHeart = false;
     }
 
     get highlighted() {
@@ -420,30 +442,71 @@ class Plate {
         if (this.plateObj.position.z < -SCENE_Z || this.plateObj.position.z > -2) {
             this.zSpeed *= -1;
         }
-        // if (Math.abs(this.plateObj.position.x - this.targetX) < 1) {
-        //     this.plateObj.position.x = this.targetX;
-        //     this.xSpeed = 0;
-        // }
-        // if (Math.abs(this.plateObj.position.y - this.targetY) < 1) {
-        //     this.plateObj.position.y = this.targetY;
-        //     this.ySpeed = 0;
-        // }
-        // if (Math.abs(this.plateObj.position.z - this.targetZ) < 1) {
-        //     this.plateObj.position.z = this.targetZ;
-        //     this.zSpeed = 0;
-        // }
-        // if (Math.abs(this.plateObj.rotation.x - this.targetRotationX) < 1) {
-        //     this.plateObj.rotation.x = this.targetRotationX;
-        //     this.xRotateSpeed = 0;
-        // }
-        // if (Math.abs(this.plateObj.rotation.y - this.targetRotationY) < 1) {
-        //     this.plateObj.rotation.y = this.targetRotationY;
-        //     this.yRotateSpeed = 0;
-        // }
-        // if (Math.abs(this.plateObj.rotation.z - this.targetRotationZ) < 1) {
-        //     this.plateObj.rotation.z = this.targetRotationZ;
-        //     this.zRotateSpeed = 0;
-        // }
+
+        if (this.creatingHeart) {
+            if (this.heartDelay > 0) {
+                this.heartDelay--;
+            } else {
+                if (this.heartNum >= 5) {
+                    this.heartNum = 0;
+                    this.creatingHeart = false;
+                } else {
+                    console.log('going to create heart');
+                    this.createHeart();
+                }
+            }
+        }
+
+        if (this.hearts.length > 0) {
+            const that = this;
+            const removeIdx = [];
+            this.hearts.forEach((h, i) => {
+                h.position.y += 2;
+                h.position.x += Math.random() * 2 - 1;
+                // const targetOpacity = parseFloat(that.heartSpans[i].style.opacity);
+                const targetOpacity = parseFloat(that.heartSpans[i].style.opacity) - 0.01;
+                that.heartSpans[i].style.opacity = targetOpacity;
+                if (targetOpacity <= 0) {
+                    that.scene.remove(h);
+                    removeIdx.push(i);
+                }
+            })
+            removeIdx.reverse().forEach(idx => {
+                that.heartSpans.splice(idx, 1);
+                that.hearts.splice(idx, 1);
+            })
+        }
+
+        if (typeof this.commentObj !== 'undefined') {
+            if (this.commentMoveDis < this.size / 2 + 60) {
+                this.commentMoveDis += this.commentSpeed;
+            }
+            this.commentObj.position.x = this.plateObj.position.x;
+            this.commentObj.position.y = this.plateObj.position.y + this.commentMoveDis;
+            this.commentObj.position.z = this.plateObj.position.z;
+            if (this.commentDelay > 0) {
+                this.commentDelay--;
+            } else {
+                if (this.commentObj.scale.x < 1 && this.commentLife === 0) {
+                    this.commentObj.scale.x += 1 / 10;
+                    this.commentObj.scale.y += 1 / 10;
+                } else {
+                    if (this.commentLife < 200) {
+                        this.commentLife++;
+                    } else {
+                        if (this.commentObj.scale.x > 0) {
+                            this.commentObj.scale.x -= 1 / 10;
+                            this.commentObj.scale.y -= 1 / 10;
+                            if (this.commentObj.scale.x < 0) {
+                                this.commentObj.scale.x = 0;
+                                this.commentObj.scale.y = 0;
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
     }
 
     pauseAudio() {
@@ -512,6 +575,43 @@ class Plate {
                 count++;
             }
             renderFrame();
+        }
+    }
+
+    createHeart() {
+        const heartSpan = document.createElement('div');
+        heartSpan.className = 'heart';
+        heartSpan.style.backgroundImage = 'url("' + this.data.feel + '")';
+        heartSpan.style.opacity = 1;
+        const heartObj = new THREE.CSS3DObject(heartSpan);
+        heartObj.position.x = this.plateObj.position.x;
+        heartObj.position.y = this.plateObj.position.y;
+        heartObj.position.z = this.plateObj.position.z;
+        this.heartSpans.push(heartSpan);
+        this.hearts.push(heartObj);
+        this.scene.add(heartObj);
+        this.heartNum++;
+        this.heartDelay = 20;
+    }
+
+    createComment() {
+        const targetComment = this.data.comment;
+        if (targetComment !== '') {
+            const commentContainer = document.createElement('div');
+            commentContainer.className = 'comment-container';
+            const commentDiv = document.createElement('div');
+            commentDiv.className = 'comment';
+            commentDiv.innerHTML = targetComment;
+            commentContainer.appendChild(commentDiv);
+            this.commentObj = new THREE.CSS3DObject(commentContainer);
+            this.commentObj.position.x = this.plateObj.position.x;
+            this.commentObj.position.y = this.plateObj.position.y;
+            this.commentObj.position.z = this.plateObj.position.z;
+            this.commentObj.scale.x = 0;
+            this.commentObj.scale.y = 0;
+            this.commentSpeed = (this.size / 2 + 60) / 10;
+            this.scene.add(this.commentObj);
+            this.commentLife = 0;
         }
     }
 }

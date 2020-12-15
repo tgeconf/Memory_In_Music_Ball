@@ -29,19 +29,27 @@
     <script src="js/snow.js"></script>
     <script src="js/cloud.js"></script>
     <script src="js/meteor.js"></script>
-    <label for="thefile" class="custom-file-upload">
+    <!-- <label for="thefile" class="custom-file-upload">
         Upload
     </label>
-    <input type="file" id="thefile" accept="audio/*" />
+    <input type="file" id="thefile" accept="audio/*" /> -->
     <audio id="audio"></audio>
     <video id="video" autoplay="true"></video>
     <img id='testImg' class='color-material' src='./img/cloud.png' />
     <canvas id='bgContainer' class='bg-container'></canvas>
     <canvas id='musicPatternContainer' class='bg-container'></canvas>
     <div id="container" class='container'></div>
-
+    <button onclick='showLike()' style='top: 10px; left: 10px;'>like</button>
+    <button onclick='showComment()' style='top: 40px; left: 10px;'>comment</button>
     <script src='./js/pickImgColors.js'></script>
     <script>
+        function showLike() {
+            cmd.showLike = true;
+        }
+        function showComment() {
+            cmd.showComment = true;
+        }
+
         let musicBall, musicBallRotateSpeed = 0, sampleRate = 2;
 
         let camera, scene, renderer, cameraPlate;
@@ -108,7 +116,7 @@
             cameraPlate = new Plate({}, scene);
             cameraPlate.initBig(
                 -Math.random() * SCENE_X / 2,
-                Math.random() * SCENE_Y/2 - SCENE_Y / 4,
+                Math.random() * SCENE_Y / 2 - SCENE_Y / 4,
                 -Math.random() * SCENE_Z - 2,
                 0,
                 0,
